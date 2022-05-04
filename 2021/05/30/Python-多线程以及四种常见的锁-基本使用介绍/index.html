@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Vogel">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="前言由于GIL的限制，python的多线程实际上只用到了cpu的单核。在计算密集型的程序中，python的多线程对提升效率的影响并不大。但在I&#x2F;O密集型的程序中，python的多线程便能极大的提高运行效率 一个简单的多线程程序12345678910111213141516import threadingdef output(value):    for i in range(5):">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 多线程以及四种常见的锁 基本使用介绍">
+<meta property="og:url" content="http://example.com/2021/05/30/Python-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%A5%E5%8F%8A%E5%9B%9B%E7%A7%8D%E5%B8%B8%E8%A7%81%E7%9A%84%E9%94%81-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="前言由于GIL的限制，python的多线程实际上只用到了cpu的单核。在计算密集型的程序中，python的多线程对提升效率的影响并不大。但在I&#x2F;O密集型的程序中，python的多线程便能极大的提高运行效率 一个简单的多线程程序12345678910111213141516import threadingdef output(value):    for i in range(5):">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-05-30T13:15:00.000Z">
+<meta property="article:modified_time" content="2022-05-04T08:18:26.870Z">
+<meta property="article:author" content="Vogel">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>Python 多线程以及四种常见的锁 基本使用介绍 - Vogel&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"48a05483321d5b851910d2cf8c523e3e","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 50vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Vogel&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Python 多线程以及四种常见的锁 基本使用介绍">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-05-30 21:15" pubdate>
+        2021年5月30日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3.9k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      33 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Python 多线程以及四种常见的锁 基本使用介绍</h1>
+            
+            <div class="markdown-body">
+              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于GIL的限制，python的多线程实际上只用到了cpu的单核。在计算密集型的程序中，python的多线程对提升效率的影响并不大。但在I&#x2F;O密集型的程序中，python的多线程便能极大的提高运行效率</p>
+<h2 id="一个简单的多线程程序"><a href="#一个简单的多线程程序" class="headerlink" title="一个简单的多线程程序"></a>一个简单的多线程程序</h2><figure class="highlight python"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> threading<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">output</span>(<span class="hljs-params">value</span>):<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):<br>        <span class="hljs-built_in">print</span>(value)<br><br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    t_list = []<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>):<br>        t = threading.Thread(target=output, args=[i])<br>        t.start()<br>        t_list.append(t)<br>    <br>    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> t_list:<br>        t.join()<br></code></pre></td></tr></table></figure>
+<p>这段代码主要分为两个部分，一部分是函数的定义，另一部分是多线程的启动。<br>首先创建了三个线程，将线程加入到数组并启动。使用join方法的目的是保证所有线程都执行完毕后才会接着去执行join以下的代码。或是让主线程等待所有子线程执行结束后再结束</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># 输出结果</span><br><span class="hljs-number">0</span><br><span class="hljs-number">0</span><br><span class="hljs-number">1</span><br><span class="hljs-number">2</span><br><span class="hljs-number">2</span><br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<p>由于pytho中的多线程是单核处理的，在执行多线程任务的时候，会在线程间进行切换。这里从不规则的输出结果中也可以直观的看出。在I&#x2F;O密集的程序中，如爬虫，在遇到requests等待的时候，python会切换到其他的线程进行执行，提高了整体的工作效率。</p>
+<h2 id="多线程冲突"><a href="#多线程冲突" class="headerlink" title="多线程冲突"></a>多线程冲突</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs Python">num = <span class="hljs-number">0</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>():<br>    <span class="hljs-keyword">global</span> num<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1000000</span>):<br>        num += <span class="hljs-number">1</span><br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    t_list = []<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):<br>        t = threading.Thread(target=add)<br>        t.start()<br>        t_list.append(t)<br>    <br>    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> t_list:<br>        t.join()<br><br>    <span class="hljs-built_in">print</span>(num)	<br><span class="hljs-comment"># Output</span><br><span class="hljs-comment"># 7483658</span><br></code></pre></td></tr></table></figure>
+<p>在使用多线程的时候，难免需要操作共同的变量。在上面的例子中，如果只是简单直接的操作，就会造成线程冲突的情况。<br>这是因为在执行 num +&#x3D;1 的时候，实际上执行了三个步骤</p>
+<ol>
+<li>拿到num的值</li>
+<li>给拿到的num加1</li>
+<li>将处理后的值赋值给num<br>上面提到过，python会在多线程直接进行切换。如果在执行完第一步以后，切换到了其他线程B.执行完线程B后再返回执行2和3,就会导致赋予的值比实际的值更小。为了避免这种情况，就需要用到锁</li>
+</ol>
+<h2 id="四种锁的基本使用"><a href="#四种锁的基本使用" class="headerlink" title="四种锁的基本使用"></a>四种锁的基本使用</h2><h3 id="互斥锁Lock"><a href="#互斥锁Lock" class="headerlink" title="互斥锁Lock"></a>互斥锁Lock</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs Python3">lock = threading.Lock()<br>num = 0<br>def add():<br>    global num<br>    lock.acquire()<br>    for i in range(1000000):<br>        num += 1<br>    lock.release()<br><br>if __name__ == &quot;__main__&quot;:<br>    t_list = []<br>    for i in range(10):<br>        t = threading.Thread(target=add)<br>        t.start()<br>        t_list.append(t)<br>    <br>    for t in t_list:<br>        t.join()<br>    <br>    print(num)<br># Output<br># 10000000<br></code></pre></td></tr></table></figure>
+<p>互斥锁是比较常见的一种锁。首先我们需要创建一个锁的对象 lock.<br>在要执行可能冲突的指令前加上锁 lock.acquire().此时如果其他的线程要访问时，就会阻塞在这里。知道这里的锁被释放。这样就保证了数据的正确性</p>
+<h3 id="递归锁Rlock"><a href="#递归锁Rlock" class="headerlink" title="递归锁Rlock"></a>递归锁Rlock</h3><p>在程序的执行过程中，可能会遇到这种情况<br>线程A锁了资源a, 线程B锁了资源b<br>此时A要访问资源b， B要访问资源a. 但因为资源都被加了锁的原因，导致它们谁都访问不了，这样就产生了死锁。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs Python3">lock = threading.RLock()<br>num = 0<br>def add():<br>    global num<br>    lock.acquire()<br>    for i in range(1000000):<br>        lock.acquire()<br>        num += 1<br>        lock.release()<br>    lock.release()<br></code></pre></td></tr></table></figure>
+<p>递归锁内部维持着一个counter，如果counter的值为0，则其他线程可以进行加锁，并且counter的值加1.<br>如果counter的值不为0，递归锁会对需要加锁的线程进行判断，如果该线程与当前递归锁的线程一致，则允许再次上锁并且counter+1. 当对递归锁进行释放，counter便会减1，知道变为0才允许其他的线程访问。这样就避免了出现死锁的情况.</p>
+<h3 id="条件锁Condition"><a href="#条件锁Condition" class="headerlink" title="条件锁Condition"></a>条件锁Condition</h3><p>条件锁主要新增了两个方法， notify和wait。 当当前状态为wait时，程序会阻塞在这里，知道其他进程执行了notify进行通知，才会继续执行下面的步骤</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import threading<br>import time<br>import random<br><br>con = threading.Condition()<br>pot = []<br>def pro():  # 生产者<br>    print(&quot;pro start&quot;)<br>    con.acquire()<br>    print(&quot;pro acquire&quot;)<br>    while True:<br>        time.sleep(random.randint(1, 3))<br>        pot.append(&quot;鱼丸&quot;)<br>        print(f&quot;生产了一个鱼丸，现在锅里有&#123;len(pot)&#125;个鱼丸&quot;)<br>        if len(pot) &gt;= 5:<br>            con.notify()<br>            con.wait()<br><br>def eat():  # 消费者<br>    print(&quot;eat start&quot;)<br>    con.acquire()<br>    print(&quot;eat acquire&quot;)<br>    while True:<br>        time.sleep(random.randint(1, 3))<br>        pot.pop()<br>        print(f&quot;吃了一个鱼丸，现在锅里还有&#123;len(pot)&#125;个鱼丸&quot;)<br>        if len(pot) == 0:<br>            con.notify()<br>            con.wait()<br><br>pro = threading.Thread(target=pro)<br>eat = threading.Thread(target=eat)<br>pro.start()<br>eat.start()<br></code></pre></td></tr></table></figure>
+<p>这里用常见的生产者消费者的关系来演示。生产者的线程首先被启动并且拿到锁，于此同时消费者也被启动，但是没有拿到锁 进入阻塞状态。生产者开始生产鱼丸，当鱼丸的个数大于等于5时，便会通知其他在阻塞状态的线程，并且自己通过wait进入阻塞。<br>阻塞状态的消费者在接受到生产者的notify消息时，便开始消费锅内的鱼丸。直到锅内没有鱼丸的时候，用notify通知其他阻塞状态中的线程，并且自己进入wait状态。一直循环</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">pro <span class="hljs-literal">start</span><br>pro acquire<br>eat <span class="hljs-literal">start</span><br>生产了一个鱼丸，现在锅里有<span class="hljs-number">1</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">2</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">3</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">4</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">5</span>个鱼丸<br>eat acquire<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">4</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">3</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">2</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">1</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">0</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">1</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">2</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">3</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">4</span>个鱼丸<br>生产了一个鱼丸，现在锅里有<span class="hljs-number">5</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">4</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">3</span>个鱼丸<br>吃了一个鱼丸，现在锅里还有<span class="hljs-number">2</span>个鱼丸<br></code></pre></td></tr></table></figure>
+<h3 id="信号量semaphore"><a href="#信号量semaphore" class="headerlink" title="信号量semaphore"></a>信号量semaphore</h3><p>多线程能够提升I&#x2F;O密集程序的效率，但并不意味着线程越多越好，因为多线程在切换的时候也会消耗一定的系统资源。此时我们就可以通过信号量对锁的数量进行限制，保证一定的效率</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import threading<br>import time<br><br>sema = threading.Semaphore(3)<br>def func():<br>    sema.acquire()<br>    print(time.time())<br>    time.sleep(3)<br>    sema.release()<br><br>t_list = []<br>for i in range(10):<br>    t = threading.Thread(target=func)<br>    t_list.append(t)<br>    t.start()<br><br>for t in t_list:<br>    t.join()<br># Output<br>#1622450593.179221<br>#1622450593.179297<br>#1622450593.179469<br>#1622450596.179563<br>#1622450596.179789<br>#1622450596.179818<br>#1622450599.179777<br>#1622450599.179847<br>#1622450599.180023<br>#1622450602.18302<br></code></pre></td></tr></table></figure>
+<p>这里我们设置了semaphore的数量为3，启动了10个线程。通过输出我们可以看到实际上每次只有3个线程拿到了锁。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/08/01/Frp%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Frp使用教程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/04/17/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E6%90%AD%E4%B8%80%E4%B8%AA%E6%A0%91%E8%8E%93%E6%B4%BE/">
+                        <span class="hidden-mobile">从零开始搭一个树莓派</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> | <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?48a05483321d5b851910d2cf8c523e3e";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Vogel">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="前言随着DNS污染、速度慢，广告多等情况日益严重，自建DNS服务成了越来越多人的选择。本项目利用Docker搭建，主要是考虑到搭建便利，更新成本低。在搭建完成后，可以针对广告、成人内容等进行屏蔽，提升上网冲浪体验。 安装 Adguard Home12345docker run --name adguardhome\	--restart unless-stopped\	-p 53:53&#x2F;tcp -p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu上基Docker的Adguard Home自建DNS系统搭建">
+<meta property="og:url" content="http://example.com/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="前言随着DNS污染、速度慢，广告多等情况日益严重，自建DNS服务成了越来越多人的选择。本项目利用Docker搭建，主要是考虑到搭建便利，更新成本低。在搭建完成后，可以针对广告、成人内容等进行屏蔽，提升上网冲浪体验。 安装 Adguard Home12345docker run --name adguardhome\	--restart unless-stopped\	-p 53:53&#x2F;tcp -p">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img1.png">
+<meta property="og:image" content="http://example.com/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img2.png">
+<meta property="og:image" content="http://example.com/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img3.png">
+<meta property="og:image" content="http://example.com/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img4.png">
+<meta property="article:published_time" content="2021-12-12T05:27:00.000Z">
+<meta property="article:modified_time" content="2022-05-04T08:23:06.647Z">
+<meta property="article:author" content="Vogel">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img1.png">
+  
+  
+  <title>Ubuntu上基Docker的Adguard Home自建DNS系统搭建 - Vogel&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"48a05483321d5b851910d2cf8c523e3e","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 50vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Vogel&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Ubuntu上基Docker的Adguard Home自建DNS系统搭建">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-12-12 13:27" pubdate>
+        2021年12月12日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.6k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      14 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Ubuntu上基Docker的Adguard Home自建DNS系统搭建</h1>
+            
+            <div class="markdown-body">
+              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着DNS污染、速度慢，广告多等情况日益严重，自建DNS服务成了越来越多人的选择。本项目利用Docker搭建，主要是考虑到搭建便利，更新成本低。在搭建完成后，可以针对广告、成人内容等进行屏蔽，提升上网冲浪体验。</p>
+<h2 id="安装-Adguard-Home"><a href="#安装-Adguard-Home" class="headerlink" title="安装 Adguard Home"></a>安装 Adguard Home</h2><figure class="highlight docker"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><pre><code class="hljs Docker">docker <span class="hljs-keyword">run</span><span class="language-bash"> --name adguardhome\</span><br><span class="language-bash">	--restart unless-stopped\</span><br><span class="language-bash">	-p 53:53/tcp -p 53:53/udp\</span><br><span class="language-bash">	-p 3000:3000\</span><br><span class="language-bash">	-d adguard/adguardhome</span><br></code></pre></td></tr></table></figure>
+<p>执行以上Docker命令即可快速的创建并运行一个Adguard Home容器。其中，53端口为DNS服务的默认端口，由于部分操作系统在指定DNS服务器的时候不支持指定端口，因此这里不建议修改。3000端口为项目管理后台WEB界面的端口，可以自行修改。</p>
+<p><strong>端口被占用</strong><br>在Ubuntu情况下可能会由于53端口占用导致无法正常创建允许容器，这是由于系统自带的’systemd-resolved.service’在负责dns的处理，因此只要把这个服务关了，就可以释放53端口</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo systemctl disable systemd-resolved.service<br>sudo systemctl stop systemd-resolved<br><br>nano <span class="hljs-regexp">/etc/</span>NetworkManager/NetworkManager.conf<br><span class="hljs-comment"># 设置dns=default</span><br><br>rm <span class="hljs-regexp">/etc/</span>resolv.conf<br>sudo service network-manager restart<br></code></pre></td></tr></table></figure>
+<h2 id="Adguard-Home初始化设置"><a href="#Adguard-Home初始化设置" class="headerlink" title="Adguard Home初始化设置"></a>Adguard Home初始化设置</h2><p>在容器正常运行后，就可以访问 <a target="_blank" rel="noopener" href="http://127.0.0.1:3000/">http://127.0.0.1:3000</a> 进到初始化界面。</p>
+<img src="/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img1.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img2.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img3.png" srcset="/img/loading.gif" lazyload class="">
+<p>初始化完成，进入仪表盘界面</p>
+<img src="/2021/12/12/Ubuntu%E4%B8%8A%E5%9F%BADocker%E7%9A%84Adguard-Home%E8%87%AA%E5%BB%BADNS%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BA/img4.png" srcset="/img/loading.gif" lazyload class="">
+
+
+<h2 id="Adguard-Home进阶设置"><a href="#Adguard-Home进阶设置" class="headerlink" title="Adguard Home进阶设置"></a>Adguard Home进阶设置</h2><p>根据不同地理位置配置上游DNS服务器，可以提高Adguard Home查询DNS的速度。具体上游DNS服务器可以参考”Adguard Home Known DNS Providers”</p>
+<p>同样，在过滤器增加规则，可以对广告相关的域名进行屏蔽.</p>
+<ol>
+<li><strong>anti-AD</strong><blockquote>
+<p>GitHub：<br><a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-easylist.txt">https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-easylist.txt</a><br>官网地址：<br><a target="_blank" rel="noopener" href="https://anti-ad.net/easylist.txt">https://anti-ad.net/easylist.txt</a></p>
+</blockquote>
+</li>
+</ol>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><blockquote>
+<ol>
+<li>Adding AdGuard to Home Assistant on Hassio on Ubuntu 18.04. [online]Available at &lt;<a target="_blank" rel="noopener" href="https://eviltyrant.com/wordpress/2019/07/adding-adguard-to-home-assistant-on-hassio-on-ubuntu-18-04/">https://eviltyrant.com/wordpress/2019/07/adding-adguard-to-home-assistant-on-hassio-on-ubuntu-18-04/</a>&gt;(2021&#x2F;12&#x2F;12)</li>
+<li>P3TERX,(2020). <em>AdGuard Home 自建 DNS 防污染、去广告教程 #1 - 安装部署详解(Docker)</em>.[online]Available at &lt;<a target="_blank" rel="noopener" href="https://p3terx.com/archives/use-adguard-home-to-build-dns-to-prevent-pollution-and-remove-ads-1.html">https://p3terx.com/archives/use-adguard-home-to-build-dns-to-prevent-pollution-and-remove-ads-1.html</a>&gt;(2021&#x2F;12&#x2F;12)</li>
+<li>Known DNS Providers. [online]Available at &lt;<a target="_blank" rel="noopener" href="https://kb.adguard.com/zh/general/dns-providers">https://kb.adguard.com/zh/general/dns-providers</a>&gt;(2021&#x2F;12&#x2F;12)</li>
+<li>chjina,(2021). <em>AdGuard 过滤规则分享</em>.[online]Available at &lt;<a target="_blank" rel="noopener" href="https://chjina.com/archives/11/">https://chjina.com/archives/11/</a>&gt;(2021&#x2F;12&#x2F;12)</li>
+</ol>
+</blockquote>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/03/12/yarn%E5%AE%89%E8%A3%85vue-cli%E5%90%8E%E6%97%A0%E6%B3%95%E5%9C%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E9%80%9A%E8%BF%87vue%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">yarn安装vue/cli后无法在命令行通过vue执行命令的解决方法</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/08/01/nginx%E8%BD%AC%E5%8F%91nextcloud%E8%AF%B7%E6%B1%82-%E5%AF%BC%E8%87%B4nextcloud%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E8%AE%BF%E9%97%AE/">
+                        <span class="hidden-mobile">Nginx转发nextcloud请求 导致nextcloud客户端无法正常访问</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> | <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?48a05483321d5b851910d2cf8c523e3e";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
