@@ -1,0 +1,483 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Vogel">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Asyncio是什么?asyncio是Python的一个标准库，通过该模块，可以在Python实现异步编程和协程。 为什么要用协程？程序执行过程中，线程的切换需要频繁的保存、加载上下文，产生消耗。而协程的切换是由程序主动切换的，相对的消耗较小。 如何使用协程？12345678import asyncioasync def main():    print(&amp;#x27;Hello ...&amp;#x27;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python异步Asyncio的使用及websocket的实现">
+<meta property="og:url" content="http://example.com/2022/05/16/Python%E5%BC%82%E6%AD%A5Asyncio%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8F%8Awebsocket%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="Asyncio是什么?asyncio是Python的一个标准库，通过该模块，可以在Python实现异步编程和协程。 为什么要用协程？程序执行过程中，线程的切换需要频繁的保存、加载上下文，产生消耗。而协程的切换是由程序主动切换的，相对的消耗较小。 如何使用协程？12345678import asyncioasync def main():    print(&amp;#x27;Hello ...&amp;#x27;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-05-16T04:29:37.000Z">
+<meta property="article:modified_time" content="2022-05-16T08:28:39.757Z">
+<meta property="article:author" content="Vogel">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>Python异步Asyncio的使用及websocket的实现 - Vogel&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"48a05483321d5b851910d2cf8c523e3e","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 50vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Vogel&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Python异步Asyncio的使用及websocket的实现">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-05-16 12:29" pubdate>
+        2022年5月16日 中午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      2.5k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      21 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Python异步Asyncio的使用及websocket的实现</h1>
+            
+            <div class="markdown-body">
+              <h2 id="Asyncio是什么"><a href="#Asyncio是什么" class="headerlink" title="Asyncio是什么?"></a>Asyncio是什么?</h2><p>asyncio是Python的一个标准库，通过该模块，可以在Python实现异步编程和协程。</p>
+<h2 id="为什么要用协程？"><a href="#为什么要用协程？" class="headerlink" title="为什么要用协程？"></a>为什么要用协程？</h2><p>程序执行过程中，线程的切换需要频繁的保存、加载上下文，产生消耗。而协程的切换是由程序主动切换的，相对的消耗较小。</p>
+<h2 id="如何使用协程？"><a href="#如何使用协程？" class="headerlink" title="如何使用协程？"></a>如何使用协程？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">import asyncio<br><br>async def main():<br>    print(&#x27;Hello ...&#x27;)<br>    await asyncio.sleep(1)<br>    print(&#x27;... World!&#x27;)<br><br>asyncio.run(main())<br></code></pre></td></tr></table></figure>
+<p>这里参考Python官网提供的一段代码,<br>可以看到，一段基本的协程代码由三部分构成</p>
+<p>1.导入asyncio模块</p>
+<p>2.声明一段异步函数</p>
+<p>和普通函数的区别是在’def’前面加上’async’。</p>
+<p>3.执行异步函数</p>
+<p>异步函数不能直接调用，这里分两种情况。</p>
+<ol>
+<li><p>在异步函数内调用异步函数</p>
+<p> 这种情况只需要在异步函数前加上’await’就可以直接调用,如</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Python3">await asyncio.sleep(1)<br></code></pre></td></tr></table></figure></li>
+<li><p>在默认流程(同步)里调用异步函数</p>
+<p> 需要使用asyncio模块调用，如</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Python3">asyncio.run(main())<br></code></pre></td></tr></table></figure></li>
+</ol>
+<p>当然，asyncio也提供其他不同的函数以支持在同步、异步函数内调用异步函数。</p>
+<h2 id="实现websocket通信"><a href="#实现websocket通信" class="headerlink" title="实现websocket通信"></a>实现websocket通信</h2><h3 id="server-py"><a href="#server-py" class="headerlink" title="server.py"></a>server.py</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import asyncio<br>import websockets<br><br><br>async def handler(websocket):<br>    while True:<br>        message = await websocket.recv()<br>        await websocket.send(message)<br><br><br>async def main():<br>    async with websockets.serve(handler, &quot;&quot;, 88):<br>        await asyncio.Future()<br><br><br>if __name__ == &quot;__main__&quot;:<br>    asyncio.run(main())<br></code></pre></td></tr></table></figure>
+<p>这是一个基础的websocket服务端代码，通过websockets模块创建serve对象，并且绑定端口和处理函数。无论服务端接受到什么，都会向客户的返回一个相同的内容。</p>
+<h3 id="client-py"><a href="#client-py" class="headerlink" title="client.py"></a>client.py</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import asyncio<br>import websockets<br><br><br>async def connect():<br>    async with websockets.connect(&quot;ws://127.0.0.1:88&quot;) as ws:<br>        while True:<br>            data = input(&quot;&quot;)<br>            await ws.send(data)<br>            resp = await ws.recv()<br><br><br>if __name__ == &quot;__main__&quot;:<br>    asyncio.run(connect())<br></code></pre></td></tr></table></figure>
+<p>这是一个基础的websocket客户代码，在连接server成功后可以进行发送，接受消息。网上很多的教程都是用的类似流程的代码，然而这段代码有着一个较大的问题。</p>
+<p>如果服务端不返回的话，代码会一直在’ws.recv()’这一行堵塞，用户无法继续发送下一条消息。想象这是一个聊天室，你在发送一条消息后，必须等待好友回复后才能发送下一条消息，这合理吗？这不合理</p>
+<p>那要如何解决呢？有两种方法</p>
+<ol>
+<li><p>多线程</p>
+<p> 将发送和接受函数分别放入不同的线程中，就可以避免阻塞导致无法进入下一步流程</p>
+</li>
+<li><p>使用asyncio的task</p>
+<p> 如果使用多线程的话，一个对话就需要两个线程，100个对话就需要200个线程，这对于性能的影响是致命的。不过还好，有了task，我们可以以一种很优雅的方式去处理这个问题</p>
+</li>
+</ol>
+<h3 id="asyncio-task-是什么？"><a href="#asyncio-task-是什么？" class="headerlink" title="asyncio task 是什么？"></a>asyncio task 是什么？</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Python3">await asyncio.sleep(5)<br></code></pre></td></tr></table></figure>
+<p>这是一行调用异步函数的代码，在这行代码里，执行与等待在同一位置。只有当这个异步函数执行完成后，阻塞才会消失</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs Python3">task = asyncio.create_task(asyncio.sleep(5))<br>print(&quot;hello&quot;)<br>await task<br></code></pre></td></tr></table></figure>
+<p>这段代码通过创建task的方式调用异步函数，在第一行执行时，异步函数就会启动。不同于await方式，task的任务启动后并不会阻塞，而是继续往下执行,也就是打印’hello’。直到碰到该任务对应的await才会阻塞。</p>
+<h3 id="优化client"><a href="#优化client" class="headerlink" title="优化client"></a>优化client</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import asyncio<br>import websockets<br><br>async def recv(ws):<br>    async for message in ws:<br>        print(message)<br><br><br>async def send(ws):<br>    while True:<br>        data = input(&quot;&quot;)<br>        await ws.send(data)<br><br><br>async def connect():<br>    async with websockets.connect(&quot;ws://127.0.0.1:88&quot;) as ws:<br>        while True:<br>            send_task = asyncio.create_task(send(ws))<br>            recv_task = asyncio.create_task(recv(ws))<br><br>            await send_task<br>            await recv_task<br><br><br>if __name__ == &quot;__main__&quot;:<br>    asyncio.run(connect())<br></code></pre></td></tr></table></figure>
+<p>通过这一特性，我们可以使用task对client的代码进行优化。</p>
+<p>首先，我们分别对发送和接受创建两个异步函数。再使用task的方式启动函数，并且配合await保持异步函数能够一直运行。这样我们就实现了任意的发送和接受消息。</p>
+<h2 id="REF"><a href="#REF" class="headerlink" title="REF"></a>REF</h2><ol>
+<li>Python.org. asyncio异步 I&#x2F;O. <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/library/asyncio.html">https://docs.python.org/zh-cn/3/library/asyncio.html</a></li>
+<li>Websockets. <a target="_blank" rel="noopener" href="https://websockets.readthedocs.io/en/stable/intro/index.html">https://websockets.readthedocs.io/en/stable/intro/index.html</a></li>
+</ol>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/03/12/yarn%E5%AE%89%E8%A3%85vue-cli%E5%90%8E%E6%97%A0%E6%B3%95%E5%9C%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E9%80%9A%E8%BF%87vue%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/">
+                        <span class="hidden-mobile">yarn安装vue/cli后无法在命令行通过vue执行命令的解决方法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> | <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?48a05483321d5b851910d2cf8c523e3e";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
