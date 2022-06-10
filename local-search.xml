@@ -4,6 +4,45 @@
   
   
   <entry>
+    <title>Python异步RabbitMQ库aio_pika无法连接的问题解析</title>
+    <link href="/2022/06/10/Python%E5%BC%82%E6%AD%A5RabbitMQ%E5%BA%93aio-pika%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90/"/>
+    <url>/2022/06/10/Python%E5%BC%82%E6%AD%A5RabbitMQ%E5%BA%93aio-pika%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90/</url>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在RabbitMQ创建了一个名为’&#x2F;test’的Virtual Host. 在使用pika库进行连接的时候可以正常连接上，但当使用aio_pika库的时候，总是连不上。</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">credentials = pika.PlainCredentials(&#x27;user&#x27;, &#x27;password&#x27;)<br><br>connection = pika.BlockingConnection(<br>    pika.ConnectionParameters(<br>        host=&#x27;ip&#x27;,<br>        port=5672,<br>        virtual_host=&#x27;/test&#x27;,<br>        credentials=credentials<br>    )<br>)<br></code></pre></td></tr></table></figure><p>以上是同步库pika的连接代码，此时可以正常连接到服务器。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs Python3">connection = await aio_pika.connect_robust(<br>    &quot;amqp://user:password@ip:port/test&quot;,<br>)<br></code></pre></td></tr></table></figure><p>以上是异步库aio_pika的连接代码，此时会产生错误’asyncio.exceptions.CancelledError’</p><p>经过排查，发现问题出在Virtual Host的命名上。由于pika库使用的是传参的形式传输virtual host,于是直接传入了一个’&#x2F;test’。但是aio_pika使用的则是amqp URL的形式，因此这里的URL需要改为”amqp:&#x2F;&#x2F;user:password@ip:port&#x2F;&#x2F;test”,也就是在port后多加上一个’&#x2F;‘,或者也可以把virtual host的名称改为’test’。</p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Sanic的类视图函数应该如何写装饰器？</title>
+    <link href="/2022/05/21/Sanic%E7%9A%84%E7%B1%BB%E8%A7%86%E5%9B%BE%E5%87%BD%E6%95%B0%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%86%99%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%9F/"/>
+    <url>/2022/05/21/Sanic%E7%9A%84%E7%B1%BB%E8%A7%86%E5%9B%BE%E5%87%BD%E6%95%B0%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%86%99%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%9F/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>在M1实现Python调用GO动态链接库</title>
+    <link href="/2022/05/19/%E5%9C%A8M1%E5%AE%9E%E7%8E%B0Python%E8%B0%83%E7%94%A8GO%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%BA%93/"/>
+    <url>/2022/05/19/%E5%9C%A8M1%E5%AE%9E%E7%8E%B0Python%E8%B0%83%E7%94%A8GO%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%BA%93/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Python异步Asyncio的使用及websocket的实现</title>
     <link href="/2022/05/16/Python%E5%BC%82%E6%AD%A5Asyncio%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8F%8Awebsocket%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
     <url>/2022/05/16/Python%E5%BC%82%E6%AD%A5Asyncio%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8F%8Awebsocket%E7%9A%84%E5%AE%9E%E7%8E%B0/</url>
