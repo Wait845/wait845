@@ -16,13 +16,15 @@
   <meta name="author" content="Vogel">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="article">
+    <meta name="description" content="前言最近开始在m1上跑tensorflow,但是发现一旦导入’tensorflow’这个包，就会导致整个Python退出。这个Python是由Anaconda创建的虚拟环境，排查了一下才发现原来之前安装的一直是X86的Python. 在网上看到的教程，很多人都说需要安装miniconda，或者是Python3.7 . 但是经过测试，发现是可以安装在Anaconda的Python3.9的. 开始安装">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Apple M1安装Tensorflow">
 <meta property="og:url" content="http://example.com/2022/07/02/Apple-M1%E5%AE%89%E8%A3%85Tensorflow/index.html">
 <meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="前言最近开始在m1上跑tensorflow,但是发现一旦导入’tensorflow’这个包，就会导致整个Python退出。这个Python是由Anaconda创建的虚拟环境，排查了一下才发现原来之前安装的一直是X86的Python. 在网上看到的教程，很多人都说需要安装miniconda，或者是Python3.7 . 但是经过测试，发现是可以安装在Anaconda的Python3.9的. 开始安装">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-07-02T10:11:27.000Z">
-<meta property="article:modified_time" content="2022-07-02T10:11:27.061Z">
+<meta property="article:modified_time" content="2022-07-02T11:05:57.752Z">
 <meta property="article:author" content="Vogel">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -158,7 +160,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      0 字
+      1.4k 字
     </span>
   
 
@@ -167,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      1 分钟
+      12 分钟
     </span>
   
 
@@ -208,12 +210,39 @@
             
               <p class="note note-info">
                 
-                  本文最后更新于：2022年7月2日 下午
+                  本文最后更新于：2022年7月2日 晚上
                 
               </p>
             
             <div class="markdown-body">
-              
+              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近开始在m1上跑tensorflow,但是发现一旦导入’tensorflow’这个包，就会导致整个Python退出。这个Python是由Anaconda创建的虚拟环境，排查了一下才发现原来之前安装的一直是X86的Python.</p>
+<p>在网上看到的教程，很多人都说需要安装miniconda，或者是Python3.7 . 但是经过测试，发现是可以安装在Anaconda的Python3.9的.</p>
+<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><h3 id="安装ARM的Anaconda"><a href="#安装ARM的Anaconda" class="headerlink" title="安装ARM的Anaconda"></a>安装ARM的Anaconda</h3><ol>
+<li>访问Anaconda官网 <a target="_blank" rel="noopener" href="https://www.anaconda.com/">https://www.anaconda.com/</a></li>
+<li>我下载的是图形安装版(64-Bit (M1) Graphical Installer)</li>
+<li>M1的Anaconda安装好后，不会自动安装Anaconda-Navigator,需要的话可以自己安装<figure class="highlight cmake"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><pre><code class="hljs cmake">conda <span class="hljs-keyword">install</span> anaconda-navigator<br></code></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="安装Python环境"><a href="#安装Python环境" class="headerlink" title="安装Python环境"></a>安装Python环境</h3><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">conda</span> create --name py39 python=<span class="hljs-number">3</span>.<span class="hljs-number">9</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="安装-Tensorflow"><a href="#安装-Tensorflow" class="headerlink" title="安装 Tensorflow"></a>安装 Tensorflow</h3><p>首先进入conda环境</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">conda <span class="hljs-built_in">activate</span> py39<br></code></pre></td></tr></table></figure>
+<p>安装tensorflow依赖包</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">conda <span class="hljs-keyword">install</span> -c apple tensorflow-deps<br></code></pre></td></tr></table></figure>
+<p>安装tensorflow</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">pip3 <span class="hljs-keyword">install</span> tensorflow-macos<br></code></pre></td></tr></table></figure>
+<p>安装tensorflow-metal(GPU加速)</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">pip3 <span class="hljs-keyword">install</span> tensorflow-metal<br></code></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import sys<br>import tensorflow.keras<br>import tensorflow as tf<br>print(f&quot;Tensor Flow Version: &#123;tf.__version__&#125;&quot;)<br>print(f&quot;Keras Version: &#123;tensorflow.keras.__version__&#125;&quot;)<br>print(f&quot;Python &#123;sys.version&#125;&quot;)<br>print(tf.config.list_physical_devices(&#x27;GPU&#x27;))<br>gpu = len(tf.config.list_physical_devices(&#x27;GPU&#x27;))&gt;0<br>print(&quot;GPU is&quot;, &quot;available&quot; if gpu else &quot;NOT AVAILABLE&quot;)<br>tf.test.is_gpu_available()<br></code></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs Python3">Tensor Flow Version: 2.9.2<br>Keras Version: 2.9.0<br>Python 3.9.12 (main, Jun  1 2022, 06:34:44) <br>[Clang 12.0.0 ]<br>[PhysicalDevice(name=&#x27;/physical_device:GPU:0&#x27;, device_type=&#x27;GPU&#x27;)]<br>GPU is available<br>True<br></code></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li>2022最新Apple M1&#x2F;Mac M1 配置安装Tensorflow环境方法(亲测可用). <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/474212619">https://zhuanlan.zhihu.com/p/474212619</a></li>
+<li>Apple MacBook M1 Anaconda安装 Tensorflow. <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/445535362">https://zhuanlan.zhihu.com/p/445535362</a></li>
+</ol>
+
             </div>
             <hr>
             <div>
