@@ -16,20 +16,20 @@
   <meta name="author" content="Vogel">
   <meta name="keywords" content="">
   
-    <meta name="description" content="前言最近开始在m1上跑tensorflow,但是发现一旦导入’tensorflow’这个包，就会导致整个Python退出。这个Python是由Anaconda创建的虚拟环境，排查了一下才发现原来之前安装的一直是X86的Python. 在网上看到的教程，很多人都说需要安装miniconda，或者是Python3.7 . 但是经过测试，发现是可以安装在Anaconda的Python3.9的. 开始安装">
+    <meta name="description" content="什么是分布式锁？分布式锁用于控制分布式系统中不同进程共用访问共享资源的一种锁实现。在同一进程中，可以很轻易的使用锁。但是在不同进程中，就需要利用到一些中间件比如Redis实现锁的机制，以防止干扰，保证一致性。 需要用到Redis哪些特征？分布式锁主要用到Redis的setnx以及expire。setnx用于设置一个key，如果该key不存在，则设置成功。反之亦然。expire用于给一个key添加一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Apple M1安装Tensorflow">
-<meta property="og:url" content="http://example.com/2022/07/02/Apple-M1%E5%AE%89%E8%A3%85Tensorflow/index.html">
+<meta property="og:title" content="Python基于异步库实现Redis分布式锁">
+<meta property="og:url" content="http://example.com/2022/07/07/Python%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%BA%93%E5%AE%9E%E7%8E%B0Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/index.html">
 <meta property="og:site_name" content="Vogel&#39;s Blog">
-<meta property="og:description" content="前言最近开始在m1上跑tensorflow,但是发现一旦导入’tensorflow’这个包，就会导致整个Python退出。这个Python是由Anaconda创建的虚拟环境，排查了一下才发现原来之前安装的一直是X86的Python. 在网上看到的教程，很多人都说需要安装miniconda，或者是Python3.7 . 但是经过测试，发现是可以安装在Anaconda的Python3.9的. 开始安装">
+<meta property="og:description" content="什么是分布式锁？分布式锁用于控制分布式系统中不同进程共用访问共享资源的一种锁实现。在同一进程中，可以很轻易的使用锁。但是在不同进程中，就需要利用到一些中间件比如Redis实现锁的机制，以防止干扰，保证一致性。 需要用到Redis哪些特征？分布式锁主要用到Redis的setnx以及expire。setnx用于设置一个key，如果该key不存在，则设置成功。反之亦然。expire用于给一个key添加一">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-07-02T10:11:27.000Z">
-<meta property="article:modified_time" content="2022-07-02T11:05:57.752Z">
+<meta property="article:published_time" content="2022-07-07T08:56:23.000Z">
+<meta property="article:modified_time" content="2022-07-08T14:06:07.834Z">
 <meta property="article:author" content="Vogel">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>Apple M1安装Tensorflow - Vogel&#39;s Blog</title>
+  <title>Python基于异步库实现Redis分布式锁 - Vogel&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -139,7 +139,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="Apple M1安装Tensorflow">
+            <span class="h2" id="subtitle" title="Python基于异步库实现Redis分布式锁">
               
             </span>
 
@@ -149,8 +149,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-07-02 17:11" pubdate>
-        2022年7月2日 下午
+      <time datetime="2022-07-07 15:56" pubdate>
+        2022年7月7日 下午
       </time>
     </span>
   
@@ -160,7 +160,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.4k 字
+      2k 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      12 分钟
+      17 分钟
     </span>
   
 
@@ -206,42 +206,28 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Apple M1安装Tensorflow</h1>
+            <h1 style="display: none">Python基于异步库实现Redis分布式锁</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：2022年7月2日 晚上
+                  本文最后更新于：2022年7月8日 晚上
                 
               </p>
             
             <div class="markdown-body">
-              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近开始在m1上跑tensorflow,但是发现一旦导入’tensorflow’这个包，就会导致整个Python退出。这个Python是由Anaconda创建的虚拟环境，排查了一下才发现原来之前安装的一直是X86的Python.</p>
-<p>在网上看到的教程，很多人都说需要安装miniconda，或者是Python3.7 . 但是经过测试，发现是可以安装在Anaconda的Python3.9的.</p>
-<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><h3 id="安装ARM的Anaconda"><a href="#安装ARM的Anaconda" class="headerlink" title="安装ARM的Anaconda"></a>安装ARM的Anaconda</h3><ol>
-<li>访问Anaconda官网 <a target="_blank" rel="noopener" href="https://www.anaconda.com/">https://www.anaconda.com/</a></li>
-<li>我下载的是图形安装版(64-Bit (M1) Graphical Installer)</li>
-<li>M1的Anaconda安装好后，不会自动安装Anaconda-Navigator,需要的话可以自己安装<figure class="highlight cmake"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><pre><code class="hljs cmake">conda <span class="hljs-keyword">install</span> anaconda-navigator<br></code></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="安装Python环境"><a href="#安装Python环境" class="headerlink" title="安装Python环境"></a>安装Python环境</h3><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">conda</span> create --name py39 python=<span class="hljs-number">3</span>.<span class="hljs-number">9</span><br></code></pre></td></tr></table></figure>
-
-<h3 id="安装-Tensorflow"><a href="#安装-Tensorflow" class="headerlink" title="安装 Tensorflow"></a>安装 Tensorflow</h3><p>首先进入conda环境</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">conda <span class="hljs-built_in">activate</span> py39<br></code></pre></td></tr></table></figure>
-<p>安装tensorflow依赖包</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">conda <span class="hljs-keyword">install</span> -c apple tensorflow-deps<br></code></pre></td></tr></table></figure>
-<p>安装tensorflow</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">pip3 <span class="hljs-keyword">install</span> tensorflow-macos<br></code></pre></td></tr></table></figure>
-<p>安装tensorflow-metal(GPU加速)</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">pip3 <span class="hljs-keyword">install</span> tensorflow-metal<br></code></pre></td></tr></table></figure>
-
-<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>代码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs Python3">import sys<br>import tensorflow.keras<br>import tensorflow as tf<br>print(f&quot;Tensor Flow Version: &#123;tf.__version__&#125;&quot;)<br>print(f&quot;Keras Version: &#123;tensorflow.keras.__version__&#125;&quot;)<br>print(f&quot;Python &#123;sys.version&#125;&quot;)<br>print(tf.config.list_physical_devices(&#x27;GPU&#x27;))<br>gpu = len(tf.config.list_physical_devices(&#x27;GPU&#x27;))&gt;0<br>print(&quot;GPU is&quot;, &quot;available&quot; if gpu else &quot;NOT AVAILABLE&quot;)<br>tf.test.is_gpu_available()<br></code></pre></td></tr></table></figure>
-<p>输出</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs Python3">Tensor Flow Version: 2.9.2<br>Keras Version: 2.9.0<br>Python 3.9.12 (main, Jun  1 2022, 06:34:44) <br>[Clang 12.0.0 ]<br>[PhysicalDevice(name=&#x27;/physical_device:GPU:0&#x27;, device_type=&#x27;GPU&#x27;)]<br>GPU is available<br>True<br></code></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li>2022最新Apple M1&#x2F;Mac M1 配置安装Tensorflow环境方法(亲测可用). <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/474212619">https://zhuanlan.zhihu.com/p/474212619</a></li>
-<li>Apple MacBook M1 Anaconda安装 Tensorflow. <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/445535362">https://zhuanlan.zhihu.com/p/445535362</a></li>
-</ol>
+              <h2 id="什么是分布式锁？"><a href="#什么是分布式锁？" class="headerlink" title="什么是分布式锁？"></a>什么是分布式锁？</h2><p>分布式锁用于控制分布式系统中不同进程共用访问共享资源的一种锁实现。在同一进程中，可以很轻易的使用锁。但是在不同进程中，就需要利用到一些中间件比如Redis实现锁的机制，以防止干扰，保证一致性。</p>
+<h2 id="需要用到Redis哪些特征？"><a href="#需要用到Redis哪些特征？" class="headerlink" title="需要用到Redis哪些特征？"></a>需要用到Redis哪些特征？</h2><p>分布式锁主要用到Redis的setnx以及expire。<br>setnx用于设置一个key，如果该key不存在，则设置成功。反之亦然。<br>expire用于给一个key添加一个过期时间，当过期时，Redis会将该key删除。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><h2 id="在这里，我使用的是Python分布式Redis库‘aioredis’。"><a href="#在这里，我使用的是Python分布式Redis库‘aioredis’。" class="headerlink" title="在这里，我使用的是Python分布式Redis库‘aioredis’。"></a>在这里，我使用的是Python分布式Redis库‘aioredis’。</h2><p>导入相关库:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">import asyncio<br>import uuid<br>import aioredis<br>import math<br>import time<br></code></pre></td></tr></table></figure>
+<hr>
+<p>首先我们实现一个上锁的函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs Python3">async def acquire_lock(app, lock_name, acquire_timeout=10, lock_timeout=10):<br>    # 生成随机身份值<br>    identifier = str(uuid.uuid4())<br>    # 锁的key值<br>    lock_name = &#x27;lock:&#x27; + lock_name<br>    # 锁的过期时间<br>    lock_timeout = int(math.ceil(lock_timeout))<br><br>    # 超时则不再尝试上锁<br>    end_acquire_time = time.time() + acquire_timeout<br>    # 从连接池获取redis对象<br>    redis = aioredis.Redis(connection_pool=app.ctx.redis_pool)<br>    while time.time() &lt; end_acquire_time:<br>        # 上锁成功<br>        if await redis.set(<br>                name=lock_name,     # 锁名<br>                value=identifier,   # 锁值<br>                ex=lock_timeout,    # 过期时间<br>                nx=True):           # 如果key存在则不上锁<br>            return identifier<br>        # 上锁失败<br>        await asyncio.sleep(1)<br>    return False<br></code></pre></td></tr></table></figure>
+<p>这里首先会随机生成一个identifier，为什么需要这个值？这个值主要是用于对锁的持有者进行一个认证。<br>举个例子，当你对key‘test’上锁并设置了过期时间5秒，并且在代码执行完成后对该锁进行释放。然而这时候你的程序却执行了10秒，在你的key过期后，已经有其他的进程拿到了‘test’的锁。如果这时你的程序还是直接delete这个key的话，就会将别人的锁进行释放。因此这里需要一个identifier值，当你在进行delete前，会进行一个判断，如果这个key的identifier值与你的相同，则可以删除。反之不能删除。<br>如果上锁成功，该函数会返回identifier的值。反之，函数会sleep一秒，然后继续尝试上锁，默认时间是10秒。如果超过acquire_timeout,则会返回False.</p>
+<hr>
+<p>接着我们再写一个释放锁的函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs Python3">async def release_lock(app, lock_name, identifier):<br>    # 锁名<br>    lock_name = &#x27;lock:&#x27; + lock_name<br>    redis = aioredis.Redis(connection_pool=app.ctx.redis_pool)<br><br>    # 开启pipeline<br>    pipe = redis.pipeline()<br>    while True:<br>        try:<br>            # 开启对key的watch<br>            await pipe.watch(lock_name)<br><br>            # 开启事务<br>            pipe.multi()<br>            await pipe.delete(lock_name)<br>            await pipe.execute()    # 执行事务<br><br>            # 关闭watch<br>            await pipe.unwatch()<br>            break<br>        except Exception as e:<br>            print(f&quot;ERROR:&#123;e&#125;&quot;)<br>            continue<br><br>    # 关闭pipeline<br>    await pipe.close()<br>    return True<br></code></pre></td></tr></table></figure>
+<p>这里的pipeline是什么？pipeline是Redis的一个机制，用于将多个set等指令合并，减少RTT(Round Time Trip)的影响。<br>multi则相当于事务，保证操作的原子性，但是不能实现回滚。因此这里还用了watch,watch会监听一个key，当pipe.execute时，如果这个key发现了变动，则execute的命令不会执行。</p>
+<p>至此，上锁和解锁的函数已经完成。<br>通过这两个函数实现了分布式锁的上锁并返回identifier、设置锁的过期时间、上锁失败后的重试以及解锁的时候防止误解其他进程的锁。</p>
 
             </div>
             <hr>
@@ -262,18 +248,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/07/07/Python%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%BA%93%E5%AE%9E%E7%8E%B0Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Python基于异步库实现Redis分布式锁</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/06/10/Python%E5%BC%82%E6%AD%A5RabbitMQ%E5%BA%93aio-pika%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90/">
-                        <span class="hidden-mobile">Python异步RabbitMQ库aio_pika无法连接的问题解析</span>
+                      <a href="/2022/07/02/Apple-M1%E5%AE%89%E8%A3%85Tensorflow/">
+                        <span class="hidden-mobile">Apple M1安装Tensorflow</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
