@@ -47,7 +47,7 @@
     <link href="/2022/05/21/Sanic%E7%9A%84%E7%B1%BB%E8%A7%86%E5%9B%BE%E5%87%BD%E6%95%B0%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%86%99%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%9F/"/>
     <url>/2022/05/21/Sanic%E7%9A%84%E7%B1%BB%E8%A7%86%E5%9B%BE%E5%87%BD%E6%95%B0%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%86%99%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%9F/</url>
     
-    <content type="html"><![CDATA[]]></content>
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote><p>为了更好的创建一个 web API，在编码时遵循“一次且仅一次”的原则很有必要的，而使用装饰器则是遵循这些原则的最好方式之一，您可以将特定的逻辑进行封装，灵活的在各种响应函数上复用。<br>在Sanic的官方文档中，只提到了在普通视图函数上使用装饰器的方法。但在更多情况下，后端都是类视图函数的结构。本文将会介绍如何在类视图函数中使用装饰器。</p></blockquote><h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">class AccessLog:<br>    @staticmethod<br>    async def get(count: int = 20) -&gt; dict:<br>        result = &#123;<br>            &quot;stream_logs&quot;: &quot;test&quot;,<br>            &quot;device_logs&quot;: &quot;test&quot;<br>        &#125;<br>        return result<br></code></pre></td></tr></table></figure><p>只需要在具体的方法前加上@关键字的装饰器就可以了。需要注意的是，根据不同的装饰器，有可能装饰器名后面需要加上’()’。</p>]]></content>
     
     
     
