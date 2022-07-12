@@ -16,20 +16,20 @@
   <meta name="author" content="Vogel">
   <meta name="keywords" content="">
   
-    <meta name="description" content="什么是分布式锁？分布式锁用于控制分布式系统中不同进程共用访问共享资源的一种锁实现。在同一进程中，可以很轻易的使用锁。但是在不同进程中，就需要利用到一些中间件比如Redis实现锁的机制，以防止干扰，保证一致性。 需要用到Redis哪些特征？分布式锁主要用到Redis的setnx以及expire。setnx用于设置一个key，如果该key不存在，则设置成功。反之亦然。expire用于给一个key添加一">
+    <meta name="description" content="一，中间件拿脉脉的搜索功能举例子，搜索功能分为 找人，搜职位，搜内容。初学后端的人一般是这么设计这三个api的:写三个函数，对应三个不同的功能，每个函数执行时都会取出request里包含的session，拿这个session验证合法性，如果合法则继续执行后面的部分并返回，否则直接返回。由于验证session这部分重复率很高，我还把这部分写成一个函数，每个功能只要调用这个函数就可以验证了。随着时间的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Python基于异步库实现Redis分布式锁">
-<meta property="og:url" content="http://example.com/2022/07/07/Python%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%BA%93%E5%AE%9E%E7%8E%B0Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/index.html">
+<meta property="og:title" content="浅谈我对中台，中间件，微服务的认识">
+<meta property="og:url" content="http://example.com/2022/07/12/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E4%B8%AD%E5%8F%B0%EF%BC%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%EF%BC%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%AE%A4%E8%AF%86/index.html">
 <meta property="og:site_name" content="Vogel&#39;s Blog">
-<meta property="og:description" content="什么是分布式锁？分布式锁用于控制分布式系统中不同进程共用访问共享资源的一种锁实现。在同一进程中，可以很轻易的使用锁。但是在不同进程中，就需要利用到一些中间件比如Redis实现锁的机制，以防止干扰，保证一致性。 需要用到Redis哪些特征？分布式锁主要用到Redis的setnx以及expire。setnx用于设置一个key，如果该key不存在，则设置成功。反之亦然。expire用于给一个key添加一">
+<meta property="og:description" content="一，中间件拿脉脉的搜索功能举例子，搜索功能分为 找人，搜职位，搜内容。初学后端的人一般是这么设计这三个api的:写三个函数，对应三个不同的功能，每个函数执行时都会取出request里包含的session，拿这个session验证合法性，如果合法则继续执行后面的部分并返回，否则直接返回。由于验证session这部分重复率很高，我还把这部分写成一个函数，每个功能只要调用这个函数就可以验证了。随着时间的">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-07-07T08:56:23.000Z">
-<meta property="article:modified_time" content="2022-07-08T14:06:07.834Z">
+<meta property="article:published_time" content="2022-07-12T08:17:16.000Z">
+<meta property="article:modified_time" content="2022-07-12T09:47:52.761Z">
 <meta property="article:author" content="Vogel">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>Python基于异步库实现Redis分布式锁 - Vogel&#39;s Blog</title>
+  <title>浅谈我对中台，中间件，微服务的认识 - Vogel&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -139,7 +139,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="Python基于异步库实现Redis分布式锁">
+            <span class="h2" id="subtitle" title="浅谈我对中台，中间件，微服务的认识">
               
             </span>
 
@@ -149,8 +149,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-07-07 15:56" pubdate>
-        2022年7月7日 下午
+      <time datetime="2022-07-12 15:17" pubdate>
+        2022年7月12日 下午
       </time>
     </span>
   
@@ -160,7 +160,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      2k 字
+      1.9k 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      17 分钟
+      16 分钟
     </span>
   
 
@@ -206,28 +206,21 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Python基于异步库实现Redis分布式锁</h1>
+            <h1 style="display: none">浅谈我对中台，中间件，微服务的认识</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：2022年7月8日 晚上
+                  本文最后更新于：2022年7月12日 下午
                 
               </p>
             
             <div class="markdown-body">
-              <h2 id="什么是分布式锁？"><a href="#什么是分布式锁？" class="headerlink" title="什么是分布式锁？"></a>什么是分布式锁？</h2><p>分布式锁用于控制分布式系统中不同进程共用访问共享资源的一种锁实现。在同一进程中，可以很轻易的使用锁。但是在不同进程中，就需要利用到一些中间件比如Redis实现锁的机制，以防止干扰，保证一致性。</p>
-<h2 id="需要用到Redis哪些特征？"><a href="#需要用到Redis哪些特征？" class="headerlink" title="需要用到Redis哪些特征？"></a>需要用到Redis哪些特征？</h2><p>分布式锁主要用到Redis的setnx以及expire。<br>setnx用于设置一个key，如果该key不存在，则设置成功。反之亦然。<br>expire用于给一个key添加一个过期时间，当过期时，Redis会将该key删除。</p>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><h2 id="在这里，我使用的是Python分布式Redis库‘aioredis’。"><a href="#在这里，我使用的是Python分布式Redis库‘aioredis’。" class="headerlink" title="在这里，我使用的是Python分布式Redis库‘aioredis’。"></a>在这里，我使用的是Python分布式Redis库‘aioredis’。</h2><p>导入相关库:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">import asyncio<br>import uuid<br>import aioredis<br>import math<br>import time<br></code></pre></td></tr></table></figure>
-<hr>
-<p>首先我们实现一个上锁的函数。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs Python3">async def acquire_lock(app, lock_name, acquire_timeout=10, lock_timeout=10):<br>    # 生成随机身份值<br>    identifier = str(uuid.uuid4())<br>    # 锁的key值<br>    lock_name = &#x27;lock:&#x27; + lock_name<br>    # 锁的过期时间<br>    lock_timeout = int(math.ceil(lock_timeout))<br><br>    # 超时则不再尝试上锁<br>    end_acquire_time = time.time() + acquire_timeout<br>    # 从连接池获取redis对象<br>    redis = aioredis.Redis(connection_pool=app.ctx.redis_pool)<br>    while time.time() &lt; end_acquire_time:<br>        # 上锁成功<br>        if await redis.set(<br>                name=lock_name,     # 锁名<br>                value=identifier,   # 锁值<br>                ex=lock_timeout,    # 过期时间<br>                nx=True):           # 如果key存在则不上锁<br>            return identifier<br>        # 上锁失败<br>        await asyncio.sleep(1)<br>    return False<br></code></pre></td></tr></table></figure>
-<p>这里首先会随机生成一个identifier，为什么需要这个值？这个值主要是用于对锁的持有者进行一个认证。<br>举个例子，当你对key‘test’上锁并设置了过期时间5秒，并且在代码执行完成后对该锁进行释放。然而这时候你的程序却执行了10秒，在你的key过期后，已经有其他的进程拿到了‘test’的锁。如果这时你的程序还是直接delete这个key的话，就会将别人的锁进行释放。因此这里需要一个identifier值，当你在进行delete前，会进行一个判断，如果这个key的identifier值与你的相同，则可以删除。反之不能删除。<br>如果上锁成功，该函数会返回identifier的值。反之，函数会sleep一秒，然后继续尝试上锁，默认时间是10秒。如果超过acquire_timeout,则会返回False.</p>
-<hr>
-<p>接着我们再写一个释放锁的函数。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs Python3">async def release_lock(app, lock_name, identifier):<br>    # 锁名<br>    lock_name = &#x27;lock:&#x27; + lock_name<br>    redis = aioredis.Redis(connection_pool=app.ctx.redis_pool)<br><br>    # 开启pipeline<br>    pipe = redis.pipeline()<br>    while True:<br>        try:<br>            # 开启对key的watch<br>            await pipe.watch(lock_name)<br><br>            # 开启事务<br>            pipe.multi()<br>            await pipe.delete(lock_name)<br>            await pipe.execute()    # 执行事务<br><br>            # 关闭watch<br>            await pipe.unwatch()<br>            break<br>        except Exception as e:<br>            print(f&quot;ERROR:&#123;e&#125;&quot;)<br>            continue<br><br>    # 关闭pipeline<br>    await pipe.close()<br>    return True<br></code></pre></td></tr></table></figure>
-<p>这里的pipeline是什么？pipeline是Redis的一个机制，用于将多个set等指令合并，减少RTT(Round Time Trip)的影响。<br>multi则相当于事务，保证操作的原子性，但是不能实现回滚。因此这里还用了watch,watch会监听一个key，当pipe.execute时，如果这个key发现了变动，则execute的命令不会执行。</p>
-<p>至此，上锁和解锁的函数已经完成。<br>通过这两个函数实现了分布式锁的上锁并返回identifier、设置锁的过期时间、上锁失败后的重试以及解锁的时候防止误解其他进程的锁。</p>
+              <h2 id="一，中间件"><a href="#一，中间件" class="headerlink" title="一，中间件"></a>一，中间件</h2><p>拿脉脉的搜索功能举例子，搜索功能分为 找人，搜职位，搜内容。初学后端的人一般是这么设计这三个api的:写三个函数，对应三个不同的功能，每个函数执行时都会取出request里包含的session，拿这个session验证合法性，如果合法则继续执行后面的部分并返回，否则直接返回。<br>由于验证session这部分重复率很高，我还把这部分写成一个函数，每个功能只要调用这个函数就可以验证了。<br>随着时间的推移，搜索功能扩展到了支持100种不同的搜索，函数也增加到了一百个，每个函数里都加上了验证session的函数。<br>突然有一天，产品经理说，这些api不再需要验证session了。那么开发就需要在每个函数里把验证session的代码给删了，工作量巨大，有没有一种方法可以满足这个要求呢？</p>
+<p>这个方法就是中间件。第一次听到这个词的时候让我很困惑，中间件，顾名思义应该是在执行过程中间做什么操作。但它其实是在执行前，后做的一些操作。<br>中间件可以在收到request后，进入执行函数前，做一些操作。<br>比如这个例子里，就可以把验证session的部分给放到中间件里。如果验证成功，就允许这个request继续往下一步到达搜索函数，否则直接在中间件就返回错误。<br>也可以在执行完搜索函数后，先返回内容给前端,然后中间件继续处理如关闭数据库连接的一些操作。</p>
+<h2 id="二，微服务"><a href="#二，微服务" class="headerlink" title="二，微服务"></a>二，微服务</h2><p>在剥离了验证session功能后，搜索函数就变成了纯粹的搜索函数。秉持着疑人不用，用人不疑的原则，这个函数不会再去关心请求是否合法，不再关心频率是否过高，它只专注于获取内容并返回，如同一个没有感情的机器,这就是微服务。<br>假如这个搜索函数每次执行需要5秒，这台机器每次只能处理100个请求。这时如果第101个请求进来，它就需要等待5+5秒的时间<br>如何解决这个问题？扩展机器，简单粗暴<br>由于这个函数已经变成了纯粹的搜索函数，所以它可以被轻易直接部署在其他机器上。那应该部署多少个机器呢？如何避免低峰时期对空闲服务器的浪费？<br>这时候就可以用k8s。k8s根据你的请求数量情况，自动创建，销毁 包含你函数功能的容器。在请求高峰的时候，创建大量容器去处理请求。在低峰的时候，销毁多余容器，释放资源</p>
+<h2 id="三，RPC"><a href="#三，RPC" class="headerlink" title="三，RPC"></a>三，RPC</h2><p>举个例子，假如一个网站提供斐波那数列计算，那么当用户要获取n的值时，会有两种方式。1.通过http协议将这个n发送给后端，后段计算出结果后返回给前端。2.前端从后段获取计算斐波那数列的js代码，然后执行这段代码获取n的值。<br>RPC的本质就是获取原本获取不到的值。<br>可能有人会疑惑，那为什么不通过请求http的方式获取值？<br>因为通过RPC,可以像调用本地函数一样去调用远程的函数。<br>拿python举例，我们有两个文件，client.py和server.py.<br>当client要掉用add这个函数的时候，RPC对象会检查本地是否有这个函数。如果没有的话，它就会请求server把add函数的代码发过来。然后client拿到代码后，在本地执行。</p>
+<p>由于RPC是支持跨语言的，也就是说在python可以调用golang的函数。那这时候就会产生一个问题，python如何执行golang的代码？答案是不行（或不方便），那么python就可以换种方式，将参数发送给server，server再返回值。<br>RPC可以基于TCP,可以基于HTTP,甚至可以基于微信聊天<br>举个例子，A不知道计算斐波那数列的代码怎么写。于是A给B发送一条消息:”哥，斐波那数列怎么用python写？能不能把代码发我？”.于是B将代码发给了A,A拿到代码后成功执行了<br>如果这时候,B不会python，只会golang。那么A即使拿到代码，也不能执行。所以这时候A就会问B:”哥，斐波那数列n为30的时候，值是多少？”.B用golang计算出值后，将值返回给A.A拿到了答案，但是不需要关心B是用什么语言</p>
+<h2 id="四，中台"><a href="#四，中台" class="headerlink" title="四，中台"></a>四，中台</h2><p>在传统的架构中，各个项目相对独立，虽然后端有很多部分逻辑一致，但会产生很多的轮子。于是有了中台的概念，中台就是把共同的东西 如：支付系统，用户系统 取出，只做一次，然后不同项目使用相同的中台，提高开发效率。如阿里的淘宝、天猫、支付宝，都可以由同一个中台支撑，如 用户中心，商品中心，交易中心。 中台分为业务中台，提供支付中心，用户中心，搜索中心等。技术中台，提供MQ,容器，RPC等。数据中台，提供数据建模，用户画像等。算法中台，提供图像识别，推荐算法等。现在很多的应用都提供微信一键登录，从某种意义说，微信在其中就是起到业务中台的用户中心作用。</p>
 
             </div>
             <hr>
@@ -248,18 +241,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/07/12/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E4%B8%AD%E5%8F%B0%EF%BC%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%EF%BC%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%AE%A4%E8%AF%86/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">浅谈我对中台，中间件，微服务的认识</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/07/02/Apple-M1%E5%AE%89%E8%A3%85Tensorflow/">
-                        <span class="hidden-mobile">Apple M1安装Tensorflow</span>
+                      <a href="/2022/07/07/Python%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%BA%93%E5%AE%9E%E7%8E%B0Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">
+                        <span class="hidden-mobile">Python基于异步库实现Redis分布式锁</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
