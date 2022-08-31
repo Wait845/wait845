@@ -16,19 +16,38 @@
   <meta name="author" content="Vogel">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="website">
-<meta property="og:title" content="归档">
-<meta property="og:url" content="http://example.com/archives/index.html">
+    <meta name="description" content="前言aioredis是Python里比较常用的一款异步Redis库，本文会介绍它提供的两种连接池 ConnectionPool12345678redis_pool &#x3D; aioredis.ConnectionPool.from_url(        &quot;redis:&#x2F;&#x2F;:pwd@127.0.0.1&#x2F;0&quot;,        max_connections&#x3D;10,        dec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python异步Redis阻塞式连接池的使用">
+<meta property="og:url" content="http://example.com/2022/08/31/Python%E5%BC%82%E6%AD%A5Redis%E9%98%BB%E5%A1%9E%E5%BC%8F%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
 <meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="前言aioredis是Python里比较常用的一款异步Redis库，本文会介绍它提供的两种连接池 ConnectionPool12345678redis_pool &#x3D; aioredis.ConnectionPool.from_url(        &quot;redis:&#x2F;&#x2F;:pwd@127.0.0.1&#x2F;0&quot;,        max_connections&#x3D;10,        dec">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-08-31T09:33:26.000Z">
+<meta property="article:modified_time" content="2022-08-31T09:53:40.864Z">
 <meta property="article:author" content="Vogel">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>归档 - Vogel&#39;s Blog</title>
+  <title>Python异步Redis阻塞式连接池的使用 - Vogel&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
@@ -55,7 +74,7 @@
 
 
 <body>
-  <header style="height: 60vh;">
+  <header style="height: 70vh;">
     <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
@@ -120,9 +139,51 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="归档">
+            <span class="h2" id="subtitle" title="Python异步Redis阻塞式连接池的使用">
               
             </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-08-31 16:33" pubdate>
+        2022年8月31日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      780 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      7 分钟
+    </span>
+  
+
+  
+  
+    
+      <!-- 不蒜子统计文章PV -->
+      <span id="busuanzi_container_page_pv" style="display: none">
+        <i class="iconfont icon-eye" aria-hidden="true"></i>
+        <span id="busuanzi_value_page_pv"></span> 次
+      </span>
+    
+  
+</div>
 
             
           </div>
@@ -135,100 +196,87 @@
 
   <main>
     
-      <div class="container nopadding-x-md">
-        <div class="py-5" id="board"
-          >
-          
-          <div class="container">
-            <div class="row">
-              <div class="col-12 col-md-10 m-auto">
-                
-
-<div class="list-group">
-  <p class="h4">共计 23 篇文章</p>
-  <hr>
-  
-  
-    
       
-      <p class="h5">2022</p>
-    
-    <a href="/2022/08/31/Python%E5%BC%82%E6%AD%A5Redis%E9%98%BB%E5%A1%9E%E5%BC%8F%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%BD%BF%E7%94%A8/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">Python异步Redis阻塞式连接池的使用</span>
-      <time style="float: right;">08-31</time>
-    </a>
-  
-    
-    <a href="/2022/07/15/%E7%94%A8%E9%A4%90%E5%8E%85%E7%BB%8F%E8%90%A5%E6%9D%A5%E8%AE%B2%E8%A7%A3%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%8CK8S-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">用餐厅经营来讲解什么是微服务，K8S,消息队列</span>
-      <time style="float: right;">07-15</time>
-    </a>
-  
-    
-    <a href="/2022/07/15/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E7%90%86%E8%A7%A3/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">浅谈我对前端框架的理解</span>
-      <time style="float: right;">07-15</time>
-    </a>
-  
-    
-    <a href="/2022/07/12/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E4%B8%AD%E5%8F%B0%EF%BC%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%EF%BC%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%AE%A4%E8%AF%86/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">浅谈我对中台，中间件，微服务的认识</span>
-      <time style="float: right;">07-12</time>
-    </a>
-  
-    
-    <a href="/2022/07/07/Python%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%BA%93%E5%AE%9E%E7%8E%B0Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">Python基于异步库实现Redis分布式锁</span>
-      <time style="float: right;">07-07</time>
-    </a>
-  
-    
-    <a href="/2022/07/02/Apple-M1%E5%AE%89%E8%A3%85Tensorflow/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">Apple M1安装Tensorflow</span>
-      <time style="float: right;">07-02</time>
-    </a>
-  
-    
-    <a href="/2022/06/10/Python%E5%BC%82%E6%AD%A5RabbitMQ%E5%BA%93aio-pika%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E6%9E%90/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">Python异步RabbitMQ库aio_pika无法连接的问题解析</span>
-      <time style="float: right;">06-10</time>
-    </a>
-  
-    
-    <a href="/2022/05/21/Sanic%E7%9A%84%E7%B1%BB%E8%A7%86%E5%9B%BE%E5%87%BD%E6%95%B0%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%86%99%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%9F/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">Sanic的类视图函数应该如何写装饰器？</span>
-      <time style="float: right;">05-21</time>
-    </a>
-  
-    
-    <a href="/2022/05/19/%E5%9C%A8M1%E5%AE%9E%E7%8E%B0Python%E8%B0%83%E7%94%A8GO%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%BA%93/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">在M1实现Python调用GO动态链接库</span>
-      <time style="float: right;">05-19</time>
-    </a>
-  
-    
-    <a href="/2022/05/16/Python%E5%BC%82%E6%AD%A5Asyncio%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8F%8Awebsocket%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">Python异步Asyncio的使用及websocket的实现</span>
-      <time style="float: right;">05-16</time>
-    </a>
-  
-</div>
 
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Python异步Redis阻塞式连接池的使用</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：2022年8月31日 下午
+                
+              </p>
+            
+            <div class="markdown-body">
+              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>aioredis是Python里比较常用的一款异步Redis库，本文会介绍它提供的两种连接池</p>
+<h2 id="ConnectionPool"><a href="#ConnectionPool" class="headerlink" title="ConnectionPool"></a>ConnectionPool</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">redis_pool = aioredis.ConnectionPool.from_url(<br>        &quot;redis://:pwd@127.0.0.1/0&quot;,<br>        max_connections=10,<br>        decode_responses=True<br>    )<br><br>redis = aioredis.Redis(connection_pool=redis_pool)<br>print(await redis.get(&quot;*&quot;))<br></code></pre></td></tr></table></figure>
+<p>这是最基础的创建连接池的方法，这里传入了redis的url，设置最大连接数为10.<br>但是这种方法有一个问题，如果同时超过10个连接都要使用这个连接池，就会导致错误.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Python3">aioredis.exceptions.ConnectionError: Too many connections<br></code></pre></td></tr></table></figure>
 
-  <nav aria-label="navigation">
-    <span class="pagination" id="pagination">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/#board">2</a><a class="page-number" href="/archives/page/3/#board">3</a><a class="extend next" rel="next" href="/archives/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
-    </span>
-  </nav>
+<h2 id="BlockingConnectionPool"><a href="#BlockingConnectionPool" class="headerlink" title="BlockingConnectionPool"></a>BlockingConnectionPool</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs Python3">redis_pool = aioredis.BlockingConnectionPool.from_url(<br>        &quot;redis://:pwd@127.0.0.1/0&quot;,<br>        max_connections=10,<br>        decode_responses=True,<br>        timeout=None<br>    )<br><br>redis = aioredis.Redis(connection_pool=redis_pool)<br>print(await redis.get(&quot;*&quot;))<br></code></pre></td></tr></table></figure>
+<p>通过BlockingConnectionPool创建连接池，当同时连接数超过最大值时，会等待‘timeout’秒.<br>只有等待时间超过’timeout’秒的时候，才会报错.如果设置timeout为None，则会一直保持等待.</p>
 
-
-
-
-              </div>
             </div>
-          </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/07/15/%E7%94%A8%E9%A4%90%E5%8E%85%E7%BB%8F%E8%90%A5%E6%9D%A5%E8%AE%B2%E8%A7%A3%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%8CK8S-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">
+                        <span class="hidden-mobile">用餐厅经营来讲解什么是微服务，K8S,消息队列</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
         </div>
       </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
     
 
     
@@ -335,6 +383,19 @@
   
 
 
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
 

@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>Python异步Redis阻塞式连接池的使用</title>
+    <link href="/2022/08/31/Python%E5%BC%82%E6%AD%A5Redis%E9%98%BB%E5%A1%9E%E5%BC%8F%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%BD%BF%E7%94%A8/"/>
+    <url>/2022/08/31/Python%E5%BC%82%E6%AD%A5Redis%E9%98%BB%E5%A1%9E%E5%BC%8F%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>aioredis是Python里比较常用的一款异步Redis库，本文会介绍它提供的两种连接池</p><h2 id="ConnectionPool"><a href="#ConnectionPool" class="headerlink" title="ConnectionPool"></a>ConnectionPool</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs Python3">redis_pool = aioredis.ConnectionPool.from_url(<br>        &quot;redis://:pwd@127.0.0.1/0&quot;,<br>        max_connections=10,<br>        decode_responses=True<br>    )<br><br>redis = aioredis.Redis(connection_pool=redis_pool)<br>print(await redis.get(&quot;*&quot;))<br></code></pre></td></tr></table></figure><p>这是最基础的创建连接池的方法，这里传入了redis的url，设置最大连接数为10.<br>但是这种方法有一个问题，如果同时超过10个连接都要使用这个连接池，就会导致错误.</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Python3">aioredis.exceptions.ConnectionError: Too many connections<br></code></pre></td></tr></table></figure><h2 id="BlockingConnectionPool"><a href="#BlockingConnectionPool" class="headerlink" title="BlockingConnectionPool"></a>BlockingConnectionPool</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs Python3">redis_pool = aioredis.BlockingConnectionPool.from_url(<br>        &quot;redis://:pwd@127.0.0.1/0&quot;,<br>        max_connections=10,<br>        decode_responses=True,<br>        timeout=None<br>    )<br><br>redis = aioredis.Redis(connection_pool=redis_pool)<br>print(await redis.get(&quot;*&quot;))<br></code></pre></td></tr></table></figure><p>通过BlockingConnectionPool创建连接池，当同时连接数超过最大值时，会等待‘timeout’秒.<br>只有等待时间超过’timeout’秒的时候，才会报错.如果设置timeout为None，则会一直保持等待.</p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>用餐厅经营来讲解什么是微服务，K8S,消息队列</title>
     <link href="/2022/07/15/%E7%94%A8%E9%A4%90%E5%8E%85%E7%BB%8F%E8%90%A5%E6%9D%A5%E8%AE%B2%E8%A7%A3%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%8CK8S-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
     <url>/2022/07/15/%E7%94%A8%E9%A4%90%E5%8E%85%E7%BB%8F%E8%90%A5%E6%9D%A5%E8%AE%B2%E8%A7%A3%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%8CK8S-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</url>
