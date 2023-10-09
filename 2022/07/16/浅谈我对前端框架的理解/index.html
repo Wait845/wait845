@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Vogel">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="一，初识框架有次参加公司的cloudbase活动，要求就是用相关的设施做一个项目。于是我和同事一拍即合，同事写前端，我写后端。当我去窥屏的时候，只看到了什么npm, install 这些难懂的东西。更让我匪夷所思的是，为什么前端还需要开一个server，难道不是直接index.html直接在浏览器打开就可以了吗。读了半本《head first html》的我，回到工位上，开始思考着前端。究竟是人性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈我对前端框架的理解">
+<meta property="og:url" content="http://example.com/2022/07/16/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E7%90%86%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="一，初识框架有次参加公司的cloudbase活动，要求就是用相关的设施做一个项目。于是我和同事一拍即合，同事写前端，我写后端。当我去窥屏的时候，只看到了什么npm, install 这些难懂的东西。更让我匪夷所思的是，为什么前端还需要开一个server，难道不是直接index.html直接在浏览器打开就可以了吗。读了半本《head first html》的我，回到工位上，开始思考着前端。究竟是人性">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-15T14:44:36.000Z">
+<meta property="article:modified_time" content="2022-07-15T14:48:00.239Z">
+<meta property="article:author" content="Vogel">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>浅谈我对前端框架的理解 - Vogel&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"48a05483321d5b851910d2cf8c523e3e","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Vogel&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="浅谈我对前端框架的理解">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-07-16 00:44" pubdate>
+        2022年7月16日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.8k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      15 分钟
+    </span>
+  
+
+  
+  
+    
+      <!-- 不蒜子统计文章PV -->
+      <span id="busuanzi_container_page_pv" style="display: none">
+        <i class="iconfont icon-eye" aria-hidden="true"></i>
+        <span id="busuanzi_value_page_pv"></span> 次
+      </span>
+    
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">浅谈我对前端框架的理解</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：2022年7月16日 凌晨
+                
+              </p>
+            
+            <div class="markdown-body">
+              <h2 id="一，初识框架"><a href="#一，初识框架" class="headerlink" title="一，初识框架"></a>一，初识框架</h2><p>有次参加公司的cloudbase活动，要求就是用相关的设施做一个项目。于是我和同事一拍即合，同事写前端，我写后端。当我去窥屏的时候，只看到了什么npm, install 这些难懂的东西。更让我匪夷所思的是，为什么前端还需要开一个server，难道不是直接index.html直接在浏览器打开就可以了吗。读了半本《head first html》的我，回到工位上，开始思考着前端。究竟是人性的泯灭还是道德的沦丧，前端为什么会变成这个样子。而且我这位同事自己也不太熟悉前端，直接把node_modules给一起打包发给我，更加深了我对前端的刻板印象</p>
+<h2 id="二，再识框架"><a href="#二，再识框架" class="headerlink" title="二，再识框架"></a>二，再识框架</h2><p>新学期，看到学校开了一门‘网页应用开发’的课，读了半本《head first html》的我信心满满的选了这门课，想着还不是白拿。结果上课第一天我就傻眼了，老师直接从创建react项目开始。没有办法，只能硬着头皮上课了。经过一学期的学习，我觉得我勉强算是入门了前端，因此在这分享，希望能帮到更多不了解前端的人</p>
+<h2 id="三，为什么要用框架"><a href="#三，为什么要用框架" class="headerlink" title="三，为什么要用框架"></a>三，为什么要用框架</h2><p>我觉得用框架最主要的原因就是提高开发速度。举个例子，一个网页需要提供一个折线统计图的视图。在传统的前端开发中，需要从网上找相应功能的代码，或者自己写。然后把这些代码复制粘贴到html代码里。但是在框架的加持下，可以直接使用折线统计图的模块，或者说函数。比如&lt;Chart&gt;&lt;&#x2F;Chart&gt;,而不是长长的一大段代码。而且还支持传入参数，比如&lt;Chart data&#x3D;{[1,2,3,4,5]}&gt;&lt;&#x2F;Chart&gt;. Npm, yarn 等就是管理’chart’这些包的软件。在用框架编写好代码后，就可以打包了。打包就是由程序去寻找&lt;Chart&gt;对应的代码，然后把这些代码写到html文件或者js文件里。从前端加载时，浏览器实际渲染的还是传统html的形式。 Html和框架的关系有点像二进制程序和c++的关系，通过c++编写程序，转换成二进制执行。而开发者并不需要输入0101去编写程序。<br>在抓包的时候，经常看到一些文件格式如main.da2kla.css 或 main.ahk22a.js 的文件。刚开始还在疑惑，到底是哪个开发写的乱七八糟的unreadable文件，现在才知道，这些其实是由框架生成的文件。</p>
+<h2 id="四，为什么前端也需要开一个server"><a href="#四，为什么前端也需要开一个server" class="headerlink" title="四，为什么前端也需要开一个server"></a>四，为什么前端也需要开一个server</h2><p>开server的目的是为了实时渲染代码。当代码有变动时，server会感受到，并且更新改动的代码。通过websocket传给浏览器，从而实现浏览器显示的画面随着代码的更新自动变化</p>
+<h2 id="五，单页应用-Single-Page-Application-是什么"><a href="#五，单页应用-Single-Page-Application-是什么" class="headerlink" title="五，单页应用(Single-Page Application)是什么"></a>五，单页应用(Single-Page Application)是什么</h2><p>要理解单页应用是什么，我觉得可以从‘应用’这个关键词开始。在我们使用一个app的时候，第一步是下载并安装这个app。打开app后，app再从后端获取需要的数据。一个app里有很多的页面，比如home页，detail页。在我们下载app的时候，同时下载了所有的页面，所以在后续的使用中我们只需要获取数据，而不需要获取页面。<br>但是在传统的web中，一个网站是以‘页’为单位的。当你访问&#x2F;home的时候，浏览器向后端请求home页的html和数据，访问&#x2F;detail的时候，浏览器向后端请求&#x2F;detail的数据.即使是使用ajax去更新数据，而不是获取整个页面，但是在跨页面的请求时，也会重新获取如 header, footer 等资源。<br>在SPA中，当用户首次访问页面的时候，就会将整个网站都发送过去。假设此时用户在默认的&#x2F;home页，当用户想要访问&#x2F;detail页面时，浏览器并不会再去向后端请求detail这个页面，因为在初次访问的时候浏览器已经拿到detail这个页面了。只有在获取detail里的内容时，浏览器才会向后端发送请求。此时整个页面就像是一个app一样。<br>理论上说，后端只需要路由 ‘&#x2F;’ 并将打包好的html发送给前端就可以了，不需要路由&#x2F;detail. 但实际上，用户可能从&#x2F;detial进行初次访问，所以后端也需要做相应的返回<br>在SPA中，整个网站就像是一个app.所以，打包后的html其实和jpg.mp4这些静态资源无异，可以直接由nginx返回。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/07/16/%E7%94%A8%E9%A4%90%E5%8E%85%E7%BB%8F%E8%90%A5%E6%9D%A5%E8%AE%B2%E8%A7%A3%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%8CK8S-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">用餐厅经营来讲解什么是微服务，K8S,消息队列</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/07/12/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E4%B8%AD%E5%8F%B0%EF%BC%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%EF%BC%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%AE%A4%E8%AF%86/">
+                        <span class="hidden-mobile">浅谈我对中台，中间件，微服务的认识</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?48a05483321d5b851910d2cf8c523e3e";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

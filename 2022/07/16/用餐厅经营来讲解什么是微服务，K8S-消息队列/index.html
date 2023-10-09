@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Vogel">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="前言虽然之前就介绍过微服务，但当时自己也是似懂非懂的状态，缺乏实战经验。近期实战后对微服务相关的概念更加深刻,因此写下这篇文章，希望能够帮助到更多正在学习中的人。本文会提到微服务和k8s的相关概念，包括k8s中的pods,nodes,services等。 概念单线程佟掌柜开了一家同福客栈，经营着餐饮和住宿。刚开始，店铺里只有一个店员“吕秀才”，他的月薪是5k。当他接到一个外卖订单时，他立马跑到厨房">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用餐厅经营来讲解什么是微服务，K8S,消息队列">
+<meta property="og:url" content="http://example.com/2022/07/16/%E7%94%A8%E9%A4%90%E5%8E%85%E7%BB%8F%E8%90%A5%E6%9D%A5%E8%AE%B2%E8%A7%A3%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%8CK8S-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/index.html">
+<meta property="og:site_name" content="Vogel&#39;s Blog">
+<meta property="og:description" content="前言虽然之前就介绍过微服务，但当时自己也是似懂非懂的状态，缺乏实战经验。近期实战后对微服务相关的概念更加深刻,因此写下这篇文章，希望能够帮助到更多正在学习中的人。本文会提到微服务和k8s的相关概念，包括k8s中的pods,nodes,services等。 概念单线程佟掌柜开了一家同福客栈，经营着餐饮和住宿。刚开始，店铺里只有一个店员“吕秀才”，他的月薪是5k。当他接到一个外卖订单时，他立马跑到厨房">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-15T14:49:46.000Z">
+<meta property="article:modified_time" content="2022-07-16T10:44:54.479Z">
+<meta property="article:author" content="Vogel">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>用餐厅经营来讲解什么是微服务，K8S,消息队列 - Vogel&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"48a05483321d5b851910d2cf8c523e3e","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Vogel&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="用餐厅经营来讲解什么是微服务，K8S,消息队列">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-07-16 00:49" pubdate>
+        2022年7月16日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.4k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      54 分钟
+    </span>
+  
+
+  
+  
+    
+      <!-- 不蒜子统计文章PV -->
+      <span id="busuanzi_container_page_pv" style="display: none">
+        <i class="iconfont icon-eye" aria-hidden="true"></i>
+        <span id="busuanzi_value_page_pv"></span> 次
+      </span>
+    
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">用餐厅经营来讲解什么是微服务，K8S,消息队列</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：2022年7月16日 晚上
+                
+              </p>
+            
+            <div class="markdown-body">
+              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>虽然之前就介绍过微服务，但当时自己也是似懂非懂的状态，缺乏实战经验。近期实战后对微服务相关的概念更加深刻,因此写下这篇文章，希望能够帮助到更多正在学习中的人。<br>本文会提到微服务和k8s的相关概念，包括k8s中的pods,nodes,services等。</p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><h3 id="单线程"><a href="#单线程" class="headerlink" title="单线程"></a>单线程</h3><p>佟掌柜开了一家同福客栈，经营着餐饮和住宿。刚开始，店铺里只有一个店员“吕秀才”，他的月薪是5k。当他接到一个外卖订单时，他立马跑到厨房做菜。此时其他外卖订单也来了，但他却无法处理，一旦超过三分钟没有接单，客户就会取消订单。效率很低，肥肠难受。</p>
+<h3 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h3><p>此时，佟掌柜又雇了一个店员“李大嘴”，两个店员每个月需要花费10k。当一个店员做菜时，另一个店员也可以接单并且跑到厨房做菜。但是这家店只能同时处理两份订单，同时处理的订单数量等于员工的数量，效率依旧很低，肥肠难受。</p>
+<h3 id="微服务"><a href="#微服务" class="headerlink" title="微服务"></a>微服务</h3><p>于是佟掌柜将厨师和前台的岗位分开。厨师李大嘴月薪3k只负责做菜，前台吕秀才月薪2k只负责接单。这样，在相同的成本下，即使有更多的订单进来，前台也可以接单。但这时候问题来了，厨师只有一个，虽然前台将单子接了，但是厨师时按顺序做菜的。就会导致后面客户需要等很长的时间，产生不满。<br>于是老板又雇了一个厨师郭芙蓉，此时餐厅的人工成本为2个厨师6k，一个前台2k。通过区分岗位为厨师和前台，只需要8k就可以完成之前10k的事。</p>
+<h3 id="注册中心"><a href="#注册中心" class="headerlink" title="注册中心"></a>注册中心</h3><p>将程序设计成微服务后，就会面临一个问题“如何实现微服务直接的调度?”. 最简单的方法就是，部署好“厨师”微服务后，拿到这个微服务的IP地址(厨师名字)，比如：李大嘴。 并且将这个IP地址直接编码在程序里，也就是告诉“前台”，如果要炒菜的话，就喊一声“李大嘴，炒一份番茄炒蛋”。这个方法有一个弊端，李大嘴去了趟西方，取了个洋名，叫作“库克”。但是前台并不知道，依旧在喊着“李大嘴，炒一份番茄炒蛋”，但此时厨师却没有任何回应。<br>注册中心就是解决这个问题的，常见的有’nacos’等。<br>当李大嘴上岗的时候，就会在小簿子上记录“厨师-李大嘴”。当郭芙蓉上岗时，也会在小簿子上写“厨师-郭芙蓉”。<br>当吕秀才接到订单的时候，就会去小簿子上看所有的厨师，然后随便找一个厨师，喊一声“xxx，炒一份番茄炒蛋”。<br>注册中心同时也有一个心跳机制，每过一段时间喊一声“xxx，你还在不在”。如果回复在的话，则保持记录，如果没有回复的话，就会将这个名字从簿子上划去。</p>
+<h3 id="K8S里的Pod是什么"><a href="#K8S里的Pod是什么" class="headerlink" title="K8S里的Pod是什么"></a>K8S里的Pod是什么</h3><p>POD是由1-n个容器组成的，为什么说k8s能控制的最小单位是POD,而不是容器？举个例子，厨师是一个容器，锅是一个容器，铲子是一个容器。如果只增加厨师的数量，而不增加锅的铲子的数量，即使雇来了厨师，也无法工作。因此，餐厅将厨师、锅、铲子定义为一个POD,要么同时增加三种容器的数量，要么都不增加。</p>
+<h3 id="K8S里的Node是什么"><a href="#K8S里的Node是什么" class="headerlink" title="K8S里的Node是什么"></a>K8S里的Node是什么</h3><p>Node就是主机，如果佟掌柜在街对面开了家连锁店，那么可以说有两个Node。厨师可以分配在任意一个分店，吕秀才接到订单后，可以让任意一家店的厨师做菜。</p>
+<h3 id="K8S里的Service是什么"><a href="#K8S里的Service是什么" class="headerlink" title="K8S里的Service是什么"></a>K8S里的Service是什么</h3><p>Service有点类似上面提到的注册中心。当佟掌柜雇了好多厨师，但是发现不好管理。于是就雇佣了一个厨师长”白展堂”。白展堂不做菜，只负责下命令。当吕秀才接到订单的时候，只需要告诉白展堂，做一份番茄炒蛋。于是白展堂就会找一个厨师做。吕秀才不需要关心到底是哪个厨师做的。</p>
+<h3 id="用K8S有什么优势？"><a href="#用K8S有什么优势？" class="headerlink" title="用K8S有什么优势？"></a>用K8S有什么优势？</h3><p>一个优势就是可以随时新增、删除厨师Pod的数量。比如同福客栈一个月只有5天是高峰期，需要5个厨师。其他25天都是低峰期，只要2个厨师。如果按照传统的方式，每个月厨师的花费就要5*3k&#x3D;15k。但是通过K8S,可以在高峰期的时候招日结零时工，一天100元。这样每个月厨师的花费就是2*3k+0.1k*3*5&#x3D;7.5k。肥肠好用。</p>
+<h3 id="消息队列是什么"><a href="#消息队列是什么" class="headerlink" title="消息队列是什么"></a>消息队列是什么</h3><p>上面提到，吕秀才收到订单后，会让白展堂安排厨师炒菜。如果这时所有厨师都在忙，白展堂就无法回复给吕秀才。吕秀才这个书呆子，没有得到回复，就会一直问白展堂“安排上了吗，安排上了吗”。此时，吕秀才就无法接其他的单子。<br>于是佟掌柜买了一本便利贴。吕秀才接单后，就写一张便利贴，然后放旁边就好了。白展堂发现有空闲的厨师，就去看看有没有便利贴还没有处理，有的话就拿一张出来，安排个厨师。</p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>在实战中，往往需要自备多个主机以实现多node，但是通过minikube,可以只在一台主机上就可以模拟多个node。</p>
+<h3 id="通过命令初始化minikube"><a href="#通过命令初始化minikube" class="headerlink" title="通过命令初始化minikube"></a>通过命令初始化minikube</h3><figure class="highlight sh"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><pre><code class="hljs sh">minikube start<br><br>😄  Darwin 12.4 (arm64) 上的 minikube v1.26.0<br>✨  自动选择 docker 驱动。其他选项：parallels, ssh<br>📌  Using Docker Desktop driver with root privileges<br>👍  Starting control plane node minikube <span class="hljs-keyword">in</span> cluster minikube<br>🚜  Pulling base image ...<br>🔥  Creating docker container (CPUs=2, Memory=4000MB) ...<br>🐳  正在 Docker 20.10.17 中准备 Kubernetes v1.24.1…<br>    ▪ Generating certificates and keys ...<br>    ▪ Booting up control plane ...<br>    ▪ Configuring RBAC rules ...<br>🔎  Verifying Kubernetes components...<br>    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5<br>🌟  Enabled addons: storage-provisioner, default-storageclass<br>🏄  Done! kubectl is now configured to use <span class="hljs-string">&quot;minikube&quot;</span> cluster and <span class="hljs-string">&quot;default&quot;</span> namespace by default<br></code></pre></td></tr></table></figure>
+<h3 id="初始化minikube后，可以查看当前的node"><a href="#初始化minikube后，可以查看当前的node" class="headerlink" title="初始化minikube后，可以查看当前的node"></a>初始化minikube后，可以查看当前的node</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get node<br><br>NAME       STATUS   ROLES           AGE   VERSION<br>minikube   Ready    control-plane   93s   v1.24.1<br></code></pre></td></tr></table></figure>
+<h3 id="通过minikube新建一个node"><a href="#通过minikube新建一个node" class="headerlink" title="通过minikube新建一个node"></a>通过minikube新建一个node</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sh">minikube node add<br><br>😄  添加节点 m02 至集群 minikube<br>❗  Cluster was created without any CNI, adding a node to it might cause broken networking.<br>👍  Starting worker node minikube-m02 <span class="hljs-keyword">in</span> cluster minikube<br>🚜  Pulling base image ...<br>🔥  Creating docker container (CPUs=2, Memory=2200MB) ...<br>🐳  正在 Docker 20.10.17 中准备 Kubernetes v1.24.1…<br>🔎  Verifying Kubernetes components...<br>🏄  Successfully added m02 to minikube!<br></code></pre></td></tr></table></figure>
+<h3 id="新建node后，查看当前node"><a href="#新建node后，查看当前node" class="headerlink" title="新建node后，查看当前node"></a>新建node后，查看当前node</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get node<br><br>NAME           STATUS   ROLES           AGE     VERSION<br>minikube       Ready    control-plane   3m48s   v1.24.1<br>minikube-m02   Ready    &lt;none&gt;          50s     v1.24.1<br></code></pre></td></tr></table></figure>
+<p>可以看到，这里多出了一个名为’minikube-m02’的node。</p>
+<h3 id="通过docker查看当前容器"><a href="#通过docker查看当前容器" class="headerlink" title="通过docker查看当前容器"></a>通过docker查看当前容器</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker ps<br><br>CONTAINER ID   IMAGE                                 COMMAND                  CREATED              STATUS                PORTS                                                                                                                        NAMES<br>a52a7710e0dc   gcr.io/k8s-minikube/kicbase:v0.0.32   <span class="hljs-string">&quot;/usr/local/bin/entr…&quot;</span>   About a minute ago   Up About a minute     0.0.0.0:49926-&gt;22/tcp, 0.0.0.0:49927-&gt;2376/tcp, 0.0.0.0:49929-&gt;5000/tcp, 0.0.0.0:49930-&gt;8443/tcp, 0.0.0.0:49928-&gt;32443/tcp   minikube-m02<br>53ebe4a2e5f2   gcr.io/k8s-minikube/kicbase:v0.0.32   <span class="hljs-string">&quot;/usr/local/bin/entr…&quot;</span>   4 minutes ago        Up 4 minutes          0.0.0.0:49616-&gt;22/tcp, 0.0.0.0:49617-&gt;2376/tcp, 0.0.0.0:49614-&gt;5000/tcp, 0.0.0.0:49615-&gt;8443/tcp, 0.0.0.0:49613-&gt;32443/tcp   minikube<br></code></pre></td></tr></table></figure>
+<p>可以看到，minikube通过创建两个docker容器为我们模拟出了两个nodes。</p>
+<h3 id="部署一个K8S应用"><a href="#部署一个K8S应用" class="headerlink" title="部署一个K8S应用"></a>部署一个K8S应用</h3><p>需要注意的是，部署的时候需要注意镜像的架构，不然可能会导致创建失败。<br>本章会部署一个kubia应用,参考(<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/381759916">https://zhuanlan.zhihu.com/p/381759916</a>)</p>
+<p><em><strong>先创建一个deployment</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl create deployment kubia-deploy --image=nuptaxin/kubia --port=8080<br></code></pre></td></tr></table></figure>
+<p><em><strong>查看deployment</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get deployments<br><br>NAME           READY   UP-TO-DATE   AVAILABLE   AGE<br>kubia-deploy   1/1     1            1           6s<br></code></pre></td></tr></table></figure>
+<p><em><strong>查看Pods</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get pods<br><br>NAME                            READY   STATUS    RESTARTS   AGE<br>kubia-deploy-7c9744674c-dz6rl   1/1     Running   0          9s<br></code></pre></td></tr></table></figure>
+<p>创建deployment后默认只开启一个pod</p>
+<p><em><strong>将Pods创建为一个Service</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl expose deployment kubia-deploy --<span class="hljs-built_in">type</span>=LoadBalancer --name kubia-deploy-http<br><br>service/kubia-deploy-http exposed<br></code></pre></td></tr></table></figure>
+<p><em><strong>查看Services</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get service<br><br>NAME                TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE<br>kubernetes          ClusterIP      10.96.0.1      &lt;none&gt;        443/TCP          25m<br>kubia-deploy-http   LoadBalancer   10.97.77.113   &lt;pending&gt;     8080:30555/TCP   6s<br></code></pre></td></tr></table></figure>
+<p>kubia service映射8080端口到pods的30555端口。因为这里使用minikube的原因，所以external-ip是pending。</p>
+<p><em><strong>查看Pods详细</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get pods -o wide<br><br>NAME                            READY   STATUS    RESTARTS   AGE   IP           NODE           NOMINATED NODE   READINESS GATES<br>kubia-deploy-7c9744674c-dz6rl   1/1     Running   0          84s   172.17.0.2   minikube-m02   &lt;none&gt;           &lt;none&gt;<br></code></pre></td></tr></table></figure>
+<p>可以看到，这里唯一的一个pod被部署到了minikube-m02这个node上。</p>
+<p><em><strong>增加Pods的数量</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl scale deployment/kubia-deploy --replicas=5<br><br>deployment.apps/kubia-deploy scaled<br></code></pre></td></tr></table></figure>
+<p><em><strong>再次查看Pods的详细</strong></em></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sh">kubectl get pods -o wide<br><br>NAME                            READY   STATUS    RESTARTS   AGE     IP           NODE           NOMINATED NODE   READINESS GATES<br>kubia-deploy-7c9744674c-6vppm   1/1     Running   0          55s     172.17.0.3   minikube-m02   &lt;none&gt;           &lt;none&gt;<br>kubia-deploy-7c9744674c-dbbf2   1/1     Running   0          55s     172.17.0.3   minikube       &lt;none&gt;           &lt;none&gt;<br>kubia-deploy-7c9744674c-dz6rl   1/1     Running   0          2m37s   172.17.0.2   minikube-m02   &lt;none&gt;           &lt;none&gt;<br>kubia-deploy-7c9744674c-ls6rt   1/1     Running   0          55s     172.17.0.4   minikube       &lt;none&gt;           &lt;none&gt;<br>kubia-deploy-7c9744674c-pbw8n   1/1     Running   0          55s     172.17.0.4   minikube-m02   &lt;none&gt;           &lt;none&gt;<br></code></pre></td></tr></table></figure>
+<p>可以看到现在有了5个pods，而且被部署到了不同的Node上。</p>
+<h3 id="访问K8S应用"><a href="#访问K8S应用" class="headerlink" title="访问K8S应用"></a>访问K8S应用</h3><p>因为这里是通过minikube创建的集群，所以无法直接通过service暴露的8080端口访问。需要通过minikube转发一趟。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs sh">minikube service kubia-deploy-http<br><br>|-----------|-------------------|-------------|---------------------------|<br>| NAMESPACE |       NAME        | TARGET PORT |            URL            |<br>|-----------|-------------------|-------------|---------------------------|<br>| default   | kubia-deploy-http |        8080 | http://192.168.49.2:30555 |<br>|-----------|-------------------|-------------|---------------------------|<br>🏃  Starting tunnel <span class="hljs-keyword">for</span> service kubia-deploy-http.<br>|-----------|-------------------|-------------|------------------------|<br>| NAMESPACE |       NAME        | TARGET PORT |          URL           |<br>|-----------|-------------------|-------------|------------------------|<br>| default   | kubia-deploy-http |             | http://127.0.0.1:55421 |<br>|-----------|-------------------|-------------|------------------------|<br>🎉  正通过默认浏览器打开服务 default/kubia-deploy-http...<br>❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.<br></code></pre></td></tr></table></figure>
+<p>执行完命令后，可以看到，minikube将55421端口转发到了service的8080上。service的8080转发到了pods的30555上。于是这里就可以通过 <a target="_blank" rel="noopener" href="http://127.0.0.1:55421/">http://127.0.0.1:55421</a> 访问service,service接受到请求后会转发到其中的一个pod上进行处理。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/08/31/Python%E5%BC%82%E6%AD%A5Redis%E9%98%BB%E5%A1%9E%E5%BC%8F%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%BD%BF%E7%94%A8/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Python异步Redis阻塞式连接池的使用</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/07/16/%E6%B5%85%E8%B0%88%E6%88%91%E5%AF%B9%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E7%9A%84%E7%90%86%E8%A7%A3/">
+                        <span class="hidden-mobile">浅谈我对前端框架的理解</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?48a05483321d5b851910d2cf8c523e3e";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
