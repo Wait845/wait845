@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>Hyper-V虚拟机&amp;WSL中Tensorflow检测不到GPU设备的解决方案</title>
+    <link href="/2024/05/23/Hyper-V%E8%99%9A%E6%8B%9F%E6%9C%BA-WSL%E4%B8%ADTensorflow%E6%A3%80%E6%B5%8B%E4%B8%8D%E5%88%B0GPU%E8%AE%BE%E5%A4%87%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
+    <url>/2024/05/23/Hyper-V%E8%99%9A%E6%8B%9F%E6%9C%BA-WSL%E4%B8%ADTensorflow%E6%A3%80%E6%B5%8B%E4%B8%8D%E5%88%B0GPU%E8%AE%BE%E5%A4%87%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/</url>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在Hyper-V虚拟机或WSL中，虽然已经安装了GPU驱动且 <code>nvidia-smi</code> 命令可以正常输出，但在使用TensorFlow时可能会提示检测不到GPU设备：</p><figure class="highlight sh"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><pre><code class="hljs sh">python3 -c <span class="hljs-string">&quot;import tensorflow as tf; print(tf.config.list_physical_devices(&#x27;GPU&#x27;))&quot;</span><br></code></pre></td></tr></table></figure><p>参考GitHub上的<a href="https://github.com/tensorflow/tensorflow/issues/63341#issuecomment-1992321474">解决方法</a>，可以按照以下步骤进行解决：</p><h2 id="解决步骤"><a href="#解决步骤" class="headerlink" title="解决步骤"></a>解决步骤</h2><ol><li><p><strong>重新安装TensorFlow包和依赖</strong></p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">pip install tensorflow[and-cuda]<br></code></pre></td></tr></table></figure><p>此时，pip会自动安装最新版本的TensorFlow，但该版本可能存在兼容性问题。</p></li><li><p><strong>安装特定版本的TensorFlow</strong></p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">pip install tensorflow==2.15<br></code></pre></td></tr></table></figure></li></ol><h2 id="测试TensorFlow"><a href="#测试TensorFlow" class="headerlink" title="测试TensorFlow"></a>测试TensorFlow</h2><p>随后执行以下命令测试TensorFlow，可以看到正常输出：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">python3 -c <span class="hljs-string">&quot;import tensorflow as tf; print(tf.config.list_physical_devices(&#x27;GPU&#x27;))&quot;</span><br></code></pre></td></tr></table></figure><p>按照以上步骤，TensorFlow应该能够正确检测到GPU设备并正常使用。</p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>一个由GPU多分区导致的Hyper-V虚拟机无法正常使用Pytorch&amp;TensorFlow GPU问题</title>
     <link href="/2024/05/22/%E4%B8%80%E4%B8%AA%E7%94%B1GPU%E5%A4%9A%E5%88%86%E5%8C%BA%E5%AF%BC%E8%87%B4%E7%9A%84Hyper-V%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8Pytorch-TensorFlow-GPU%E9%97%AE%E9%A2%98/"/>
     <url>/2024/05/22/%E4%B8%80%E4%B8%AA%E7%94%B1GPU%E5%A4%9A%E5%88%86%E5%8C%BA%E5%AF%BC%E8%87%B4%E7%9A%84Hyper-V%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8Pytorch-TensorFlow-GPU%E9%97%AE%E9%A2%98/</url>
